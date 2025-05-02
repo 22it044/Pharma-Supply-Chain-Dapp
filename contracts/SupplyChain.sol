@@ -166,10 +166,10 @@ contract SupplyChain {
 
     //To supply raw materials from RMS supplier to the manufacturer
     function RMSsupply(uint256 _medicineID) public {
-        require(_medicineID > 0 && _medicineID <= medicineCtr);
+        require(_medicineID > 0 && _medicineID <= medicineCtr, "RMSsupply: Invalid Medicine ID");
         uint256 _id = findRMS(msg.sender);
-        require(_id > 0);
-        require(MedicineStock[_medicineID].stage == STAGE.Init);
+        require(_id > 0, "RMSsupply: Caller is not a registered RMS");
+        require(MedicineStock[_medicineID].stage == STAGE.Init, "RMSsupply: Medicine not in Init stage");
         MedicineStock[_medicineID].RMSid = _id;
         MedicineStock[_medicineID].stage = STAGE.RawMaterialSupply;
     }
@@ -185,10 +185,10 @@ contract SupplyChain {
 
     //To manufacture medicine
     function Manufacturing(uint256 _medicineID) public {
-        require(_medicineID > 0 && _medicineID <= medicineCtr);
+        require(_medicineID > 0 && _medicineID <= medicineCtr, "Manufacturing: Invalid Medicine ID");
         uint256 _id = findMAN(msg.sender);
-        require(_id > 0);
-        require(MedicineStock[_medicineID].stage == STAGE.RawMaterialSupply);
+        require(_id > 0, "Manufacturing: Caller is not a registered Manufacturer");
+        require(MedicineStock[_medicineID].stage == STAGE.RawMaterialSupply, "Manufacturing: Medicine not in RawMaterialSupply stage");
         MedicineStock[_medicineID].MANid = _id;
         MedicineStock[_medicineID].stage = STAGE.Manufacture;
     }
@@ -204,10 +204,10 @@ contract SupplyChain {
 
     //To supply medicines from Manufacturer to distributor
     function Distribute(uint256 _medicineID) public {
-        require(_medicineID > 0 && _medicineID <= medicineCtr);
+        require(_medicineID > 0 && _medicineID <= medicineCtr, "Distribute: Invalid Medicine ID");
         uint256 _id = findDIS(msg.sender);
-        require(_id > 0);
-        require(MedicineStock[_medicineID].stage == STAGE.Manufacture);
+        require(_id > 0, "Distribute: Caller is not a registered Distributor");
+        require(MedicineStock[_medicineID].stage == STAGE.Manufacture, "Distribute: Medicine not in Manufacture stage");
         MedicineStock[_medicineID].DISid = _id;
         MedicineStock[_medicineID].stage = STAGE.Distribution;
     }
@@ -223,10 +223,10 @@ contract SupplyChain {
 
     //To supply medicines from distributor to retailer
     function Retail(uint256 _medicineID) public {
-        require(_medicineID > 0 && _medicineID <= medicineCtr);
+        require(_medicineID > 0 && _medicineID <= medicineCtr, "Retail: Invalid Medicine ID");
         uint256 _id = findRET(msg.sender);
-        require(_id > 0);
-        require(MedicineStock[_medicineID].stage == STAGE.Distribution);
+        require(_id > 0, "Retail: Caller is not a registered Retailer");
+        require(MedicineStock[_medicineID].stage == STAGE.Distribution, "Retail: Medicine not in Distribution stage");
         MedicineStock[_medicineID].RETid = _id;
         MedicineStock[_medicineID].stage = STAGE.Retail;
     }
@@ -242,11 +242,11 @@ contract SupplyChain {
 
     //To sell medicines from retailer to consumer
     function sold(uint256 _medicineID) public {
-        require(_medicineID > 0 && _medicineID <= medicineCtr);
+        require(_medicineID > 0 && _medicineID <= medicineCtr, "Sold: Invalid Medicine ID");
         uint256 _id = findRET(msg.sender);
-        require(_id > 0);
-        require(_id == MedicineStock[_medicineID].RETid); //Only correct retailer can mark medicine as sold
-        require(MedicineStock[_medicineID].stage == STAGE.Retail);
+        require(_id > 0, "Sold: Caller is not a registered Retailer");
+        require(_id == MedicineStock[_medicineID].RETid, "Sold: Caller is not the assigned Retailer for this medicine"); 
+        require(MedicineStock[_medicineID].stage == STAGE.Retail, "Sold: Medicine not in Retail stage");
         MedicineStock[_medicineID].stage = STAGE.sold;
     }
 

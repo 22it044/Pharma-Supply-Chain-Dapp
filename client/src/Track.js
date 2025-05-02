@@ -41,7 +41,12 @@ function Track() {
   const loadWeb3 = async () => {
     if (window.ethereum) {
       window.web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+      } catch (error) {
+         console.error("User denied account access", error);
+         window.alert("User denied account access. Please allow Metamask connection.");
+      }
     } else if (window.web3) {
       window.web3 = new Web3(window.web3.currentProvider);
     } else {
@@ -53,24 +58,44 @@ function Track() {
   const loadBlockchaindata = async () => {
     setloader(true);
     const web3 = window.web3;
-    const accounts = await web3.eth.getAccounts();
-    const account = accounts[0];
-    setCurrentaccount(account);
-    const networkId = await web3.eth.net.getId();
-    const networkData = SupplyChainABI.networks[networkId];
-    if (networkData) {
-      const supplychain = new web3.eth.Contract(
-        SupplyChainABI.abi,
-        networkData.address
-      );
-      setSupplyChain(supplychain);
-       // No need to load all medicines here, just setup contract
-      setloader(false);
-    } else {
-      window.alert(
-        "The smart contract is not deployed to current network. Verify Metamask connection."
-      );
-      setloader(false);
+
+    if (!web3) {
+        console.error("[Track.js] web3 instance not found!");
+        window.alert("Web3 instance not found. Please ensure Metamask is installed and enabled.");
+        setloader(false);
+        return;
+    }
+
+    try {
+        const accounts = await web3.eth.getAccounts();
+        if (accounts.length === 0) {
+            console.error("[Track.js] No accounts found.");
+            window.alert("No accounts found. Please ensure Metamask is unlocked and connected.");
+            setloader(false);
+            return;
+        }
+        const account = accounts[0];
+        setCurrentaccount(account);
+
+        const networkId = await web3.eth.net.getId();
+        const networkData = SupplyChainABI.networks[networkId];
+
+        if (networkData) {
+            const supplychain = new web3.eth.Contract(
+                SupplyChainABI.abi,
+                networkData.address
+            );
+            setSupplyChain(supplychain);
+            // No need to load all medicines here, just setup contract
+        } else {
+            console.error(`[Track.js] Smart contract not deployed to network ${networkId}.`);
+            window.alert("The smart contract is not deployed to the current network. Verify Metamask connection.");
+        }
+    } catch (error) {
+         console.error("[Track.js] Error loading blockchain data:", error);
+         window.alert("An error occurred connecting to the blockchain. Check console.");
+    } finally {
+        setloader(false);
     }
   };
 
@@ -84,9 +109,12 @@ function Track() {
 
   const handlerSubmit = async (event) => {
     event.preventDefault();
-    if (!ID || !SupplyChain) return; // Ensure ID and contract exist
+    if (!ID || !SupplyChain) {
+        alert("Please enter a valid Medicine ID. Contract not loaded?");
+        return;
+    }
 
-    // Reset visibility states
+    // Reset visibility states and data
     showTrackTillSold(false);
     showTrackTillRetail(false);
     showTrackTillDistribution(false);
@@ -95,69 +123,110 @@ function Track() {
     showTrackNotProcessing(false);
 
     setloader(true); // Show loader during fetch
+    console.log(`Tracking Medicine ID: ${ID}`);
 
     try {
-      var ctr = await SupplyChain.methods.medicineCtr().call();
-      if (ID > ctr || ID <= 0) { // Basic validation
-         alert("Invalid Medicine ID.");
+      // Check if ID is valid before proceeding
+      const ctr = await SupplyChain.methods.medicineCtr().call();
+      const currentId = parseInt(ID, 10);
+      if (isNaN(currentId) || currentId <= 0 || currentId > ctr) {
+         alert(`Invalid Medicine ID: ${ID}. Please enter a number between 1 and ${ctr}.`);
          setloader(false);
          return;
       }
 
       // Fetch data for the specific ID
+      console.log("Fetching MedicineStock...");
       const medData = await SupplyChain.methods.MedicineStock(ID).call();
+      console.log("Fetching showStage...");
       const stage = await SupplyChain.methods.showStage(ID).call();
 
       setMED(medData);
       setMedStage(stage);
+      console.log(`Medicine Data:`, medData);
+      console.log(`Medicine Stage: ${stage}`);
 
       // Fetch participant data based on stage
       if (stage === "Raw Material Supplied") {
+        console.log("Fetching RMS data...");
         const rmsData = await SupplyChain.methods.RMS(medData.RMSid).call();
         setRMS(rmsData);
         showTrackTillRMS(true);
       } else if (stage === "Manufactured") {
+        console.log("Fetching RMS data...");
         const rmsData = await SupplyChain.methods.RMS(medData.RMSid).call();
-        const manData = await SupplyChain.methods.MAN(medData.MANid).call();
         setRMS(rmsData);
+        console.log("Fetching MAN data...");
+        const manData = await SupplyChain.methods.MAN(medData.MANid).call();
         setMAN(manData);
+        showTrackTillRMS(true);
         showTrackTillManufacture(true);
       } else if (stage === "Distributed") {
+         console.log("Fetching RMS data...");
          const rmsData = await SupplyChain.methods.RMS(medData.RMSid).call();
-         const manData = await SupplyChain.methods.MAN(medData.MANid).call();
-         const disData = await SupplyChain.methods.DIS(medData.DISid).call();
          setRMS(rmsData);
+         console.log("Fetching MAN data...");
+         const manData = await SupplyChain.methods.MAN(medData.MANid).call();
          setMAN(manData);
+         console.log("Fetching DIS data...");
+         const disData = await SupplyChain.methods.DIS(medData.DISid).call();
          setDIS(disData);
+         showTrackTillRMS(true);
+         showTrackTillManufacture(true);
          showTrackTillDistribution(true);
-      } else if (stage === "Retailered") {
+      } else if (stage === "Retail") {
+         console.log("Fetching RMS data...");
          const rmsData = await SupplyChain.methods.RMS(medData.RMSid).call();
-         const manData = await SupplyChain.methods.MAN(medData.MANid).call();
-         const disData = await SupplyChain.methods.DIS(medData.DISid).call();
-         const retData = await SupplyChain.methods.RET(medData.RETid).call();
          setRMS(rmsData);
+         console.log("Fetching MAN data...");
+         const manData = await SupplyChain.methods.MAN(medData.MANid).call();
          setMAN(manData);
+         console.log("Fetching DIS data...");
+         const disData = await SupplyChain.methods.DIS(medData.DISid).call();
          setDIS(disData);
+         console.log("Fetching RET data...");
+         const retData = await SupplyChain.methods.RET(medData.RETid).call();
          setRET(retData);
+         showTrackTillRMS(true);
+         showTrackTillManufacture(true);
+         showTrackTillDistribution(true);
          showTrackTillRetail(true);
       } else if (stage === "Sold") {
+         console.log("Fetching RMS data...");
          const rmsData = await SupplyChain.methods.RMS(medData.RMSid).call();
-         const manData = await SupplyChain.methods.MAN(medData.MANid).call();
-         const disData = await SupplyChain.methods.DIS(medData.DISid).call();
-         const retData = await SupplyChain.methods.RET(medData.RETid).call();
          setRMS(rmsData);
+         console.log("Fetching MAN data...");
+         const manData = await SupplyChain.methods.MAN(medData.MANid).call();
          setMAN(manData);
+         console.log("Fetching DIS data...");
+         const disData = await SupplyChain.methods.DIS(medData.DISid).call();
          setDIS(disData);
+         console.log("Fetching RET data...");
+         const retData = await SupplyChain.methods.RET(medData.RETid).call();
          setRET(retData);
+         showTrackTillRMS(true);
+         showTrackTillManufacture(true);
+         showTrackTillDistribution(true);
+         showTrackTillRetail(true);
          showTrackTillSold(true);
-      } else {
+      } else { // Handle 'Ordered' or other potential initial states
+        console.log("Stage is 'Ordered' or unknown, showing basic info.");
         showTrackNotProcessing(true);
       }
+
     } catch (err) {
-      console.error("Error tracking medicine:", err);
-      alert("An error occurred while tracking the medicine.");
+      console.error("Error occurred during tracking:", err);
+      alert(`An error occurred while tracking Medicine ID ${ID}. Check console for details. Message: ${err.message || 'Unknown error'}`);
+      // Reset states on error to avoid showing stale/incorrect data
+      setMED({});
+      setMedStage('');
+      setRMS(null);
+      setMAN(null);
+      setDIS(null);
+      setRET(null);
+    } finally {
+      setloader(false); // Hide loader regardless of success or error
     }
-    setloader(false); // Hide loader after fetch
   };
 
    // Render Tracking Information Conditionally

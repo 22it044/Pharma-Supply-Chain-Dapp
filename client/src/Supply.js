@@ -14,23 +14,29 @@ import Spinner from 'react-bootstrap/Spinner';
 
 function Supply() {
   const navigate = useNavigate();
-  useEffect(() => {
-    loadWeb3();
-    loadBlockchaindata();
-  }, []);
-
-  // State variables (keep existing)
   const [currentaccount, setCurrentaccount] = useState("");
   const [loader, setloader] = useState(true);
   const [SupplyChain, setSupplyChain] = useState();
-  const [MED, setMED] = useState({}); // Initialize as object
-  const [MedStage, setMedStage] = useState([]); // Initialize as array
-  const [ID, setID] = useState();
+  const [medicinesList, setMedicinesList] = useState([]); // Consolidated state
+  const [ID, setID] = useState(''); // Current ID for stage update
+
+  useEffect(() => {
+    const init = async () => {
+      await loadWeb3();
+      await loadBlockchaindata();
+    };
+    init();
+  }, []);
 
   const loadWeb3 = async () => {
     if (window.ethereum) {
       window.web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+      } catch (error) {
+         console.error("User denied account access", error);
+         window.alert("User denied account access. Please allow Metamask connection.");
+      }
     } else if (window.web3) {
       window.web3 = new Web3(window.web3.currentProvider);
     } else {
@@ -39,107 +45,124 @@ function Supply() {
       );
     }
   };
+
+  // Dedicated fetch function for medicines
+  const fetchMedicines = async (supplyChainInstance) => {
+      try {
+          const medCount = await supplyChainInstance.methods.medicineCtr().call();
+          const fetchedMedicines = [];
+          for (let i = 1; i <= medCount; i++) {
+              try {
+                  const med = await supplyChainInstance.methods.MedicineStock(i).call();
+                  const stage = await supplyChainInstance.methods.showStage(i).call();
+                  fetchedMedicines.push({ ...med, stage: stage });
+              } catch (medError) {
+                   console.error(`Error fetching details for medicine ID ${i}:`, medError);
+              }
+          }
+          setMedicinesList(fetchedMedicines);
+      } catch (err) {
+           console.error("Error fetching medicine list:", err);
+           setMedicinesList([]);
+      }
+  };
+
   const loadBlockchaindata = async () => {
     setloader(true);
     const web3 = window.web3;
-    const accounts = await web3.eth.getAccounts();
-    const account = accounts[0];
-    setCurrentaccount(account);
-    const networkId = await web3.eth.net.getId();
-    const networkData = SupplyChainABI.networks[networkId];
-    if (networkData) {
-      const supplychain = new web3.eth.Contract(
-        SupplyChainABI.abi,
-        networkData.address
-      );
-      setSupplyChain(supplychain);
-      var i;
-      const medCtr = await supplychain.methods.medicineCtr().call();
-      const med = {};
-      const medStage = [];
-      for (i = 0; i < medCtr; i++) {
-        med[i + 1] = await supplychain.methods.MedicineStock(i + 1).call(); // Use ID as key
-        medStage[i + 1] = await supplychain.methods.showStage(i + 1).call(); // Use ID as key
-      }
-      setMED(med);
-      setMedStage(medStage);
-      setloader(false);
-    } else {
-      window.alert("The smart contract is not deployed to current network");
+
+    if (!web3) {
+        console.error("[Supply.js] web3 instance not found!");
+        window.alert("Web3 instance not found. Please ensure Metamask is installed and enabled.");
+        setloader(false);
+        return;
+    }
+
+    try {
+        const accounts = await web3.eth.getAccounts();
+        if (accounts.length === 0) {
+            console.error("[Supply.js] No accounts found.");
+            window.alert("No accounts found. Please ensure Metamask is unlocked and connected.");
+            setloader(false);
+            return;
+        }
+        const account = accounts[0];
+        setCurrentaccount(account);
+
+        const networkId = await web3.eth.net.getId();
+        const networkData = SupplyChainABI.networks[networkId];
+
+        if (networkData) {
+            const supplychain = new web3.eth.Contract(
+                SupplyChainABI.abi,
+                networkData.address
+            );
+            setSupplyChain(supplychain);
+            await fetchMedicines(supplychain); // Fetch medicines using dedicated function
+        } else {
+            console.error(`Smart contract not deployed to network ${networkId}.`);
+            window.alert("The smart contract is not deployed to the current network.");
+        }
+    } catch (error) {
+         console.error("[Supply.js] Error loading blockchain data:", error);
+         window.alert("An error occurred loading blockchain data. Check console.");
+    } finally {
+        setloader(false);
     }
   };
 
-  // Keep existing handlers
   const redirect_to_home = () => {
     navigate("/");
   };
+
   const handlerChangeID = (event) => {
     setID(event.target.value);
   };
-  const handlerSubmitRMSsupply = async (event) => {
-    event.preventDefault();
+
+  // --- Updated Submit Handlers for Stage Changes ---
+
+  const handleStageChange = async (stageFunctionName) => {
+    if (!SupplyChain || !currentaccount || !ID) {
+        alert("Please ensure blockchain data is loaded and you have entered a Medicine ID.");
+        return;
+    }
+    setloader(true);
+    console.log(`Attempting to call ${stageFunctionName} for ID: ${ID}`);
     try {
-      var reciept = await SupplyChain.methods
-        .RMSsupply(ID)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
+        const receipt = await SupplyChain.methods[stageFunctionName](ID).send({ from: currentaccount });
+        if (receipt) {
+            console.log(`${stageFunctionName} successful:`, receipt);
+            alert(`Medicine ID ${ID} successfully moved to ${stageFunctionName} stage!`);
+            await fetchMedicines(SupplyChain); // Re-fetch medicines list to update stage
+        }
     } catch (err) {
-      alert("An error occured!!!");
+        console.error(`Error calling ${stageFunctionName} for ID ${ID}:`, err);
+        alert(`Error updating stage to ${stageFunctionName}: ${err.message || 'Check console for details.'}`);
+    } finally {
+        setloader(false);
     }
   };
-  const handlerSubmitManufacturing = async (event) => {
+
+  // Specific handlers now call the generic one
+  const handlerSubmitRMSsupply = (event) => {
     event.preventDefault();
-    try {
-      var reciept = await SupplyChain.methods
-        .Manufacturing(ID)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
-    } catch (err) {
-      alert("An error occured!!!");
-    }
+    handleStageChange('RMSsupply');
   };
-  const handlerSubmitDistribute = async (event) => {
+  const handlerSubmitManufacturing = (event) => {
     event.preventDefault();
-    try {
-      var reciept = await SupplyChain.methods
-        .Distribute(ID)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
-    } catch (err) {
-      alert("An error occured!!!");
-    }
+    handleStageChange('Manufacturing');
   };
-  const handlerSubmitRetail = async (event) => {
+  const handlerSubmitDistribute = (event) => {
     event.preventDefault();
-    try {
-      var reciept = await SupplyChain.methods
-        .Retail(ID)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
-    } catch (err) {
-      alert("An error occured!!!");
-    }
+    handleStageChange('Distribute');
   };
-  const handlerSubmitSold = async (event) => {
+  const handlerSubmitRetail = (event) => {
     event.preventDefault();
-    try {
-      var reciept = await SupplyChain.methods
-        .sold(ID)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
-    } catch (err) {
-      alert("An error occured!!!");
-    }
+    handleStageChange('Retail');
+  };
+  const handlerSubmitSold = (event) => {
+    event.preventDefault();
+    handleStageChange('sold');
   };
 
   // Loader
@@ -224,16 +247,20 @@ function Supply() {
                 </tr>
               </thead>
               <tbody>
-                {Object.keys(MED).map(function (key) {
-                  return (
-                    <tr key={key}>
-                      <td>{MED[key].id}</td>
-                      <td>{MED[key].name}</td>
-                      <td>{MED[key].description}</td>
-                      <td>{MedStage[key]}</td>
+                {medicinesList.length > 0 ? (
+                  medicinesList.map((medItem, key) => (
+                    <tr key={medItem.id}> {/* Use unique ID for key if possible */}
+                      <td>{medItem.id.toString()}</td>
+                      <td>{medItem.name}</td>
+                      <td>{medItem.description}</td>
+                      <td>{medItem.stage}</td>
                     </tr>
-                  );
-                })}
+                  ))
+                 ) : (
+                   <tr>
+                    <td colSpan="4" className="text-center">No medicines found or data loading.</td>
+                   </tr>
+                 )}
               </tbody>
             </Table>
          </Card.Body>

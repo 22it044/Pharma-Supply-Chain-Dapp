@@ -42,20 +42,85 @@ function AssignRoles() {
   const [MANaddress, setMANaddress] = useState();
   const [DISaddress, setDISaddress] = useState();
   const [RETaddress, setRETaddress] = useState();
-  const [RMS, setRMS] = useState({}); // Initialize as empty object
-  const [MAN, setMAN] = useState({}); // Initialize as empty object
-  const [DIS, setDIS] = useState({}); // Initialize as empty object
-  const [RET, setRET] = useState({}); // Initialize as empty object
 
+  // --- Participant List States (Initialize as Arrays) ---
+  const [RMS, setRMS] = useState([]); // Use array for list
+  const [MAN, setMAN] = useState([]); // Use array for list
+  const [DIS, setDIS] = useState([]); // Use array for list
+  const [RET, setRET] = useState([]); // Use array for list
+  // --- End State Variables ---
+
+  // --- Fetch Functions ---
+  const fetchRMS = async (supplyChainInstance) => {
+    try {
+      const count = await supplyChainInstance.methods.rmsCtr().call();
+      const rmsList = [];
+      for (let i = 1; i <= count; i++) {
+        const rms = await supplyChainInstance.methods.RMS(i).call();
+        rmsList.push(rms);
+      }
+      setRMS(rmsList || []);
+    } catch (err) {
+      console.error("Error fetching RMS:", err);
+      setRMS([]); // Set to empty array on error
+    }
+  };
+
+  const fetchMAN = async (supplyChainInstance) => {
+    try {
+      const count = await supplyChainInstance.methods.manCtr().call();
+      const manList = [];
+      for (let i = 1; i <= count; i++) {
+        const man = await supplyChainInstance.methods.MAN(i).call();
+        manList.push(man);
+      }
+      setMAN(manList || []);
+    } catch (err) {
+      console.error("Error fetching Manufacturers:", err);
+      setMAN([]);
+    }
+  };
+
+  const fetchDIS = async (supplyChainInstance) => {
+    try {
+      const count = await supplyChainInstance.methods.disCtr().call();
+      const disList = [];
+      for (let i = 1; i <= count; i++) {
+        const dis = await supplyChainInstance.methods.DIS(i).call();
+        disList.push(dis);
+      }
+      setDIS(disList || []);
+    } catch (err) {
+      console.error("Error fetching Distributors:", err);
+      setDIS([]);
+    }
+  };
+
+  const fetchRET = async (supplyChainInstance) => {
+    try {
+      const count = await supplyChainInstance.methods.retCtr().call();
+      const retList = [];
+      for (let i = 1; i <= count; i++) {
+        const ret = await supplyChainInstance.methods.RET(i).call();
+        retList.push(ret);
+      }
+      setRET(retList || []);
+    } catch (err) {
+      console.error("Error fetching Retailers:", err);
+      setRET([]);
+    }
+  };
+  // --- End Fetch Functions ---
 
   const loadWeb3 = async () => {
-    // <<< Debugging Log Start >>>
-    console.log("loadWeb3 function started...");
-    // <<< Debugging Log End >>>
-
     if (window.ethereum) {
       window.web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+      } catch (error) {
+        console.error("[loadWeb3] User denied account access or error occurred:", error);
+        window.alert("User denied account access. Please allow Metamask connection.");
+      }
     } else if (window.web3) {
       window.web3 = new Web3(window.web3.currentProvider);
     } else {
@@ -63,68 +128,53 @@ function AssignRoles() {
         "Non-Ethereum browser detected. You should consider trying MetaMask!"
       );
     }
-    // <<< Debugging Log Start >>>
-    console.log("loadWeb3 function finished.");
-    // <<< Debugging Log End >>>
   };
 
   const loadBlockchaindata = async () => {
     setloader(true);
     const web3 = window.web3;
-    const accounts = await web3.eth.getAccounts();
-    const account = accounts[0];
-    setCurrentaccount(account);
-    const networkId = await web3.eth.net.getId();
-
-    // <<< Debugging Logs Start >>>
-    console.log("Network ID from Metamask:", networkId); // Keep previous logs
-    console.log("Available networks in ABI:", SupplyChainABI.networks); // Keep previous logs
-    // <<< Debugging Logs End >>>
-
-    const networkData = SupplyChainABI.networks[networkId];
-
-    // <<< Debugging Logs Start >>>
-    console.log("Network Data found for ID", networkId, ":", networkData); // Keep previous logs
-    // <<< Debugging Logs End >>>
-
-    if (networkData) {
-      const supplychain = new web3.eth.Contract(
-        SupplyChainABI.abi,
-        networkData.address
-      );
-      setSupplyChain(supplychain);
-      var i;
-      const rmsCtr = await supplychain.methods.rmsCtr().call();
-      const rmsData = {}; // Use temporary object
-      for (i = 0; i < rmsCtr; i++) {
-        rmsData[i] = await supplychain.methods.RMS(i + 1).call();
-      }
-      setRMS(rmsData); // Update state once
-
-      const manCtr = await supplychain.methods.manCtr().call();
-      const manData = {}; // Use temporary object
-      for (i = 0; i < manCtr; i++) {
-        manData[i] = await supplychain.methods.MAN(i + 1).call();
-      }
-      setMAN(manData); // Update state once
-
-      const disCtr = await supplychain.methods.disCtr().call();
-      const disData = {}; // Use temporary object
-      for (i = 0; i < disCtr; i++) {
-        disData[i] = await supplychain.methods.DIS(i + 1).call();
-      }
-      setDIS(disData); // Update state once
-
-      const retCtr = await supplychain.methods.retCtr().call();
-      const retData = {}; // Use temporary object
-      for (i = 0; i < retCtr; i++) {
-        retData[i] = await supplychain.methods.RET(i + 1).call();
-      }
-      setRET(retData); // Update state once
-
+    if (!web3) {
+      console.error("[loadBlockchaindata] web3 instance not found!");
       setloader(false);
-    } else {
-      window.alert("The smart contract is not deployed to current network");
+      return; // Exit if web3 isn't initialized
+    }
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+      if (accounts.length === 0) {
+        console.error("[loadBlockchaindata] No accounts found. Is Metamask unlocked and connected?");
+        window.alert("No accounts found. Please ensure Metamask is unlocked and connected to this site.");
+        setloader(false);
+        return;
+      }
+      const account = accounts[0];
+      setCurrentaccount(account);
+
+      const networkId = await web3.eth.net.getId();
+      const networkData = SupplyChainABI.networks[networkId];
+
+      if (networkData) {
+        const supplychain = new web3.eth.Contract(
+          SupplyChainABI.abi,
+          networkData.address
+        );
+        setSupplyChain(supplychain);
+
+        await fetchRMS(supplychain);
+        await fetchMAN(supplychain);
+        await fetchDIS(supplychain);
+        await fetchRET(supplychain);
+
+        setloader(false);
+      } else {
+        console.error("[loadBlockchaindata] Smart contract not deployed to detected network (", networkId, "). Check contract migration and Metamask network.");
+        window.alert("The smart contract is not deployed to current network. Please check Metamask network or deploy the contract.");
+        setloader(false); // Stop loader even if contract fails
+      }
+    } catch (error) {
+      console.error("[loadBlockchaindata] Error during blockchain data loading:", error);
+      window.alert("An error occurred while loading blockchain data. Check console.");
+      setloader(false);
     }
   };
 
@@ -169,59 +219,88 @@ function AssignRoles() {
     setRETname(event.target.value);
   };
 
-  // Keep existing submit functions
+  // --- Submit Handlers ---
   const handlerSubmitRMS = async (event) => {
     event.preventDefault();
     try {
-      var reciept = await SupplyChain.methods
+      if (!SupplyChain) return; // Ensure contract is loaded
+      setloader(true); // Show loader during transaction
+      await SupplyChain.methods
         .addRMS(RMSaddress, RMSname, RMSplace)
         .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
+      // --- Re-fetch RMS list after successful transaction ---
+      await fetchRMS(SupplyChain);
+      setloader(false); // Hide loader
+      // Optionally clear input fields
+      setRMSaddress(''); setRMSname(''); setRMSplace('');
     } catch (err) {
-      alert("An error occured!!!");
+      alert("Error registering RMS. Check console for details.");
+      console.error(err);
+      setloader(false); // Hide loader on error
     }
   };
+
   const handlerSubmitMAN = async (event) => {
-    event.preventDefault();
-    try {
-      var reciept = await SupplyChain.methods
-        .addManufacturer(MANaddress, MANname, MANplace)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
-    } catch (err) {
-      alert("An error occured!!!");
-    }
+     event.preventDefault();
+        try {
+            if (!SupplyChain) return;
+            setloader(true);
+            await SupplyChain.methods
+                .addManufacturer(MANaddress, MANname, MANplace)
+                .send({ from: currentaccount });
+            // --- Re-fetch MAN list ---
+             await fetchMAN(SupplyChain);
+             setloader(false);
+             // Clear input fields
+              setMANaddress(''); setMANname(''); setMANplace('');
+        } catch (err) {
+             alert("Error registering Manufacturer. Check console for details.");
+            console.error(err);
+            setloader(false);
+        }
   };
+
   const handlerSubmitDIS = async (event) => {
     event.preventDefault();
-    try {
-      var reciept = await SupplyChain.methods
-        .addDistributor(DISaddress, DISname, DISplace)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
-    } catch (err) {
-      alert("An error occured!!!");
-    }
+        try {
+            if (!SupplyChain) return;
+             setloader(true);
+            await SupplyChain.methods
+                .addDistributor(DISaddress, DISname, DISplace)
+                .send({ from: currentaccount });
+             // --- Re-fetch DIS list ---
+             await fetchDIS(SupplyChain);
+             setloader(false);
+             // Clear input fields
+             setDISaddress(''); setDISname(''); setDISplace('');
+        } catch (err) {
+             alert("Error registering Distributor. Check console for details.");
+            console.error(err);
+            setloader(false);
+        }
   };
+
   const handlerSubmitRET = async (event) => {
     event.preventDefault();
-    try {
-      var reciept = await SupplyChain.methods
-        .addRetailer(RETaddress, RETname, RETplace)
-        .send({ from: currentaccount });
-      if (reciept) {
-        loadBlockchaindata();
-      }
-    } catch (err) {
-      alert("An error occured!!!");
-    }
+        try {
+             if (!SupplyChain) return;
+             setloader(true);
+            await SupplyChain.methods
+                .addRetailer(RETaddress, RETname, RETplace)
+                .send({ from: currentaccount });
+            // --- Re-fetch RET list ---
+            await fetchRET(SupplyChain);
+            setloader(false);
+            // Clear input fields
+            setRETaddress(''); setRETname(''); setRETplace('');
+        } catch (err) {
+             alert("Error registering Retailer. Check console for details.");
+            console.error(err);
+            setloader(false);
+        }
   };
+  // --- End Submit Handlers ---
+
 
   // Loader component
   if (loader) {
@@ -313,16 +392,14 @@ function AssignRoles() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(RMS).map(function (key) {
-                    return (
-                      <tr key={key}>
-                        <td>{RMS[key].id}</td>
-                        <td>{RMS[key].name}</td>
-                        <td>{RMS[key].place}</td>
-                        <td>{RMS[key].addr}</td>
-                      </tr>
-                    );
-                  })}
+                  {RMS.map((rms, index) => (
+                    <tr key={index}>
+                      <td>{rms.id}</td>
+                      <td>{rms.name}</td>
+                      <td>{rms.place}</td>
+                      <td>{rms.addr}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             </Col>
@@ -392,16 +469,14 @@ function AssignRoles() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(MAN).map(function (key) {
-                    return (
-                      <tr key={key}>
-                        <td>{MAN[key].id}</td>
-                        <td>{MAN[key].name}</td>
-                        <td>{MAN[key].place}</td>
-                        <td>{MAN[key].addr}</td>
-                      </tr>
-                    );
-                  })}
+                  {MAN.map((man, index) => (
+                    <tr key={index}>
+                      <td>{man.id}</td>
+                      <td>{man.name}</td>
+                      <td>{man.place}</td>
+                      <td>{man.addr}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             </Col>
@@ -471,16 +546,14 @@ function AssignRoles() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(DIS).map(function (key) {
-                    return (
-                      <tr key={key}>
-                        <td>{DIS[key].id}</td>
-                        <td>{DIS[key].name}</td>
-                        <td>{DIS[key].place}</td>
-                        <td>{DIS[key].addr}</td>
-                      </tr>
-                    );
-                  })}
+                  {DIS.map((dis, index) => (
+                    <tr key={index}>
+                      <td>{dis.id}</td>
+                      <td>{dis.name}</td>
+                      <td>{dis.place}</td>
+                      <td>{dis.addr}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             </Col>
@@ -550,16 +623,14 @@ function AssignRoles() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(RET).map(function (key) {
-                    return (
-                      <tr key={key}>
-                        <td>{RET[key].id}</td>
-                        <td>{RET[key].name}</td>
-                        <td>{RET[key].place}</td>
-                        <td>{RET[key].addr}</td>
-                      </tr>
-                    );
-                  })}
+                  {RET.map((ret, index) => (
+                    <tr key={index}>
+                      <td>{ret.id}</td>
+                      <td>{ret.name}</td>
+                      <td>{ret.place}</td>
+                      <td>{ret.addr}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             </Col>
