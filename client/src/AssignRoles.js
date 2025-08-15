@@ -301,42 +301,89 @@ function AssignRoles() {
   };
   // --- End Submit Handlers ---
 
+  // --- Toggle Status Handlers ---
+  const toggleRMSStatus = async (id) => {
+    try {
+      await SupplyChain.methods.toggleRMSStatus(id).send({ from: currentaccount });
+      alert("RMS status toggled successfully!");
+      await fetchRMS(SupplyChain); // Refresh list
+    } catch (err) {
+      console.error("Error toggling RMS status:", err);
+      alert(`Error: ${err.message || 'Failed to toggle RMS status'}`);
+    }
+  };
+
+  const toggleManufacturerStatus = async (id) => {
+    try {
+      await SupplyChain.methods.toggleManufacturerStatus(id).send({ from: currentaccount });
+      alert("Manufacturer status toggled successfully!");
+      await fetchMAN(SupplyChain); // Refresh list
+    } catch (err) {
+      console.error("Error toggling Manufacturer status:", err);
+      alert(`Error: ${err.message || 'Failed to toggle Manufacturer status'}`);
+    }
+  };
+
+  const toggleDistributorStatus = async (id) => {
+    try {
+      await SupplyChain.methods.toggleDistributorStatus(id).send({ from: currentaccount });
+      alert("Distributor status toggled successfully!");
+      await fetchDIS(SupplyChain); // Refresh list
+    } catch (err) {
+      console.error("Error toggling Distributor status:", err);
+      alert(`Error: ${err.message || 'Failed to toggle Distributor status'}`);
+    }
+  };
+
+  const toggleRetailerStatus = async (id) => {
+    try {
+      await SupplyChain.methods.toggleRetailerStatus(id).send({ from: currentaccount });
+      alert("Retailer status toggled successfully!");
+      await fetchRET(SupplyChain); // Refresh list
+    } catch (err) {
+      console.error("Error toggling Retailer status:", err);
+      alert(`Error: ${err.message || 'Failed to toggle Retailer status'}`);
+    }
+  };
+  // --- End Toggle Status Handlers ---
+
 
   // Loader component
   if (loader) {
     return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <h1 className="wait mt-3">Loading Blockchain Data...</h1>
-      </Container>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container className="text-center">
+          <Spinner animation="border" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <h4 className="wait mt-3">Loading Blockchain Data...</h4>
+        </Container>
+      </div>
     );
   }
 
   // Main component render
   return (
-    <Container className="mt-4">
-      <Row className="mb-3">
-        <Col>
-          <h4>Register Participants</h4>
-          <p>Current Account: {currentaccount}</p>
-        </Col>
-        <Col className="text-end">
-          <Button variant="secondary" onClick={redirect_to_home}>
-            Back to Home
-          </Button>
-        </Col>
-      </Row>
-      <hr/>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', paddingBottom: '3rem' }}>
+      <Container className="mt-4">
+        <Row className="mb-4">
+          <Col>
+            <h4 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)' }}>👥 Register Participants</h4>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Current Account: <code style={{ background: 'var(--bg-tertiary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.875rem' }}>{currentaccount}</code></p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <span className="badge-premium badge-primary" style={{ marginRight: '0.5rem' }}>Blockchain Connected</span>
+            </div>
+          </Col>
+        </Row>
+        <hr/>
 
-      {/* Raw Material Suppliers Card */}
-      <Card className="mb-4">
-        <Card.Header as="h5">Raw Material Suppliers (RMS)</Card.Header>
+        {/* Raw Material Suppliers Card */}
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>🏭 Raw Material Suppliers (RMS)</Card.Header>
         <Card.Body>
           <Row>
             <Col md={6} className="mb-3 mb-md-0">
-              <h6>Register New RMS</h6>
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Register New RMS</h6>
               <Form onSubmit={handlerSubmitRMS}>
                 <Form.Group as={Row} className="mb-3" controlId="formRMSAddress">
                   <Form.Label column sm={3}>Address</Form.Label>
@@ -381,14 +428,17 @@ function AssignRoles() {
               </Form>
             </Col>
             <Col md={6}>
-              <h6>Registered RMS</h6>
-              <Table striped bordered hover responsive size="sm">
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Registered RMS</h6>
+              <div style={{ overflowX: 'auto', background: 'white', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <Table striped bordered hover responsive size="sm" style={{ marginBottom: '0' }}>
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
                     <th>Place</th>
-                    <th>Ethereum Address</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -397,23 +447,44 @@ function AssignRoles() {
                       <td>{rms.id}</td>
                       <td>{rms.name}</td>
                       <td>{rms.place}</td>
-                      <td>{rms.addr}</td>
+                      <td style={{ fontSize: '0.75rem' }}>{rms.addr.substring(0, 8)}...{rms.addr.substring(rms.addr.length - 6)}</td>
+                      <td>
+                        <span className={rms.isActive ? "badge-premium badge-success" : "badge-premium"} style={{ 
+                          background: rms.isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #64748b, #475569)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          padding: '0.25rem 0.625rem'
+                        }}>
+                          {rms.isActive ? '✓ Active' : '✕ Inactive'}
+                        </span>
+                      </td>
+                      <td>
+                        <Button 
+                          variant={rms.isActive ? "warning" : "success"} 
+                          size="sm"
+                          onClick={() => toggleRMSStatus(rms.id)}
+                          style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}
+                        >
+                          {rms.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
+              </div>
             </Col>
           </Row>
         </Card.Body>
-      </Card>
+        </Card>
 
-      {/* Manufacturers Card */}
-      <Card className="mb-4">
-        <Card.Header as="h5">Manufacturers (MAN)</Card.Header>
+        {/* Manufacturers Card */}
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>🏢 Manufacturers (MAN)</Card.Header>
         <Card.Body>
           <Row>
             <Col md={6} className="mb-3 mb-md-0">
-              <h6>Register New Manufacturer</h6>
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Register New Manufacturer</h6>
               <Form onSubmit={handlerSubmitMAN}>
                  <Form.Group as={Row} className="mb-3" controlId="formMANAddress">
                   <Form.Label column sm={3}>Address</Form.Label>
@@ -458,14 +529,17 @@ function AssignRoles() {
               </Form>
             </Col>
             <Col md={6}>
-              <h6>Registered Manufacturers</h6>
-              <Table striped bordered hover responsive size="sm">
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Registered Manufacturers</h6>
+              <div style={{ overflowX: 'auto', background: 'white', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <Table striped bordered hover responsive size="sm" style={{ marginBottom: '0' }}>
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
                     <th>Place</th>
-                    <th>Ethereum Address</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -474,23 +548,44 @@ function AssignRoles() {
                       <td>{man.id}</td>
                       <td>{man.name}</td>
                       <td>{man.place}</td>
-                      <td>{man.addr}</td>
+                      <td style={{ fontSize: '0.75rem' }}>{man.addr.substring(0, 8)}...{man.addr.substring(man.addr.length - 6)}</td>
+                      <td>
+                        <span className={man.isActive ? "badge-premium badge-success" : "badge-premium"} style={{ 
+                          background: man.isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #64748b, #475569)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          padding: '0.25rem 0.625rem'
+                        }}>
+                          {man.isActive ? '✓ Active' : '✕ Inactive'}
+                        </span>
+                      </td>
+                      <td>
+                        <Button 
+                          variant={man.isActive ? "warning" : "success"} 
+                          size="sm"
+                          onClick={() => toggleManufacturerStatus(man.id)}
+                          style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}
+                        >
+                          {man.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
+              </div>
             </Col>
           </Row>
         </Card.Body>
-      </Card>
+        </Card>
 
-      {/* Distributors Card */}
-      <Card className="mb-4">
-        <Card.Header as="h5">Distributors (DIS)</Card.Header>
+        {/* Distributors Card */}
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>🚚 Distributors (DIS)</Card.Header>
         <Card.Body>
           <Row>
             <Col md={6} className="mb-3 mb-md-0">
-              <h6>Register New Distributor</h6>
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Register New Distributor</h6>
               <Form onSubmit={handlerSubmitDIS}>
                  <Form.Group as={Row} className="mb-3" controlId="formDISAddress">
                   <Form.Label column sm={3}>Address</Form.Label>
@@ -535,14 +630,17 @@ function AssignRoles() {
               </Form>
             </Col>
             <Col md={6}>
-              <h6>Registered Distributors</h6>
-              <Table striped bordered hover responsive size="sm">
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Registered Distributors</h6>
+              <div style={{ overflowX: 'auto', background: 'white', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <Table striped bordered hover responsive size="sm" style={{ marginBottom: '0' }}>
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
                     <th>Place</th>
-                    <th>Ethereum Address</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -551,23 +649,44 @@ function AssignRoles() {
                       <td>{dis.id}</td>
                       <td>{dis.name}</td>
                       <td>{dis.place}</td>
-                      <td>{dis.addr}</td>
+                      <td style={{ fontSize: '0.75rem' }}>{dis.addr.substring(0, 8)}...{dis.addr.substring(dis.addr.length - 6)}</td>
+                      <td>
+                        <span className={dis.isActive ? "badge-premium badge-success" : "badge-premium"} style={{ 
+                          background: dis.isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #64748b, #475569)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          padding: '0.25rem 0.625rem'
+                        }}>
+                          {dis.isActive ? '✓ Active' : '✕ Inactive'}
+                        </span>
+                      </td>
+                      <td>
+                        <Button 
+                          variant={dis.isActive ? "warning" : "success"} 
+                          size="sm"
+                          onClick={() => toggleDistributorStatus(dis.id)}
+                          style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}
+                        >
+                          {dis.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
+              </div>
             </Col>
           </Row>
         </Card.Body>
-      </Card>
+        </Card>
 
-      {/* Retailers Card */}
-      <Card className="mb-4">
-        <Card.Header as="h5">Retailers (RET)</Card.Header>
+        {/* Retailers Card */}
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>🏪 Retailers (RET)</Card.Header>
         <Card.Body>
           <Row>
             <Col md={6} className="mb-3 mb-md-0">
-              <h6>Register New Retailer</h6>
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Register New Retailer</h6>
               <Form onSubmit={handlerSubmitRET}>
                 <Form.Group as={Row} className="mb-3" controlId="formRETAddress">
                   <Form.Label column sm={3}>Address</Form.Label>
@@ -612,14 +731,17 @@ function AssignRoles() {
               </Form>
             </Col>
             <Col md={6}>
-              <h6>Registered Retailers</h6>
-              <Table striped bordered hover responsive size="sm">
+              <h6 style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Registered Retailers</h6>
+              <div style={{ overflowX: 'auto', background: 'white', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <Table striped bordered hover responsive size="sm" style={{ marginBottom: '0' }}>
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
                     <th>Place</th>
-                    <th>Ethereum Address</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -628,16 +750,38 @@ function AssignRoles() {
                       <td>{ret.id}</td>
                       <td>{ret.name}</td>
                       <td>{ret.place}</td>
-                      <td>{ret.addr}</td>
+                      <td style={{ fontSize: '0.75rem' }}>{ret.addr.substring(0, 8)}...{ret.addr.substring(ret.addr.length - 6)}</td>
+                      <td>
+                        <span className={ret.isActive ? "badge-premium badge-success" : "badge-premium"} style={{ 
+                          background: ret.isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #64748b, #475569)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          padding: '0.25rem 0.625rem'
+                        }}>
+                          {ret.isActive ? '✓ Active' : '✕ Inactive'}
+                        </span>
+                      </td>
+                      <td>
+                        <Button 
+                          variant={ret.isActive ? "warning" : "success"} 
+                          size="sm"
+                          onClick={() => toggleRetailerStatus(ret.id)}
+                          style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}
+                        >
+                          {ret.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
+              </div>
             </Col>
           </Row>
         </Card.Body>
-      </Card>
-    </Container>
+        </Card>
+      </Container>
+    </div>
   );
 }
 

@@ -4,12 +4,14 @@ import Home from "./Home";
 import AddMed from "./AddMed";
 import Supply from "./Supply";
 import Track from "./Track";
+import PremiumNavbar from "./Components/Navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <div className="App">
       <Router>
+        <PremiumNavbar />
         <Routes>
           <Route path="/" exact element={<Home />} />
           <Route path="/roles" element={<AssignRoles />} />

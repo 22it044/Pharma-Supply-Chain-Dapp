@@ -155,32 +155,33 @@ function AddMed() {
 
   if (loader) {
     return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <h1 className="wait mt-3">Loading Blockchain Data...</h1>
-      </Container>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container className="text-center">
+          <Spinner animation="border" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <h4 className="wait mt-3">Loading Blockchain Data...</h4>
+        </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="mt-4">
-       <Row className="mb-3">
-        <Col>
-          <h4>Order Medicines</h4>
-           <p>Current Account: {currentaccount}</p>
-        </Col>
-        <Col className="text-end">
-          <Button variant="secondary" onClick={redirect_to_home}>
-            Back to Home
-          </Button>
-        </Col>
-      </Row>
-      <hr/>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', paddingBottom: '3rem' }}>
+      <Container className="mt-4">
+        <Row className="mb-4">
+          <Col>
+            <h4 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)' }}>💊 Order Medicines</h4>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Current Account: <code style={{ background: 'var(--bg-tertiary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.875rem' }}>{currentaccount}</code></p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <span className="badge-premium badge-success">Manufacturer Access</span>
+            </div>
+          </Col>
+        </Row>
+        <hr/>
 
-      <Card className="mb-4">
-         <Card.Header as="h5">Order New Medicine Batch</Card.Header>
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>➕ Order New Medicine Batch</Card.Header>
          <Card.Body>
             <Form onSubmit={handlerSubmitMED}>
               <Row className="mb-3">
@@ -212,9 +213,10 @@ function AddMed() {
          </Card.Body>
       </Card>
 
-       <Card className="mb-4">
-         <Card.Header as="h5">Existing Medicine Batches</Card.Header>
-         <Card.Body>
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>📊 Existing Medicine Batches</Card.Header>
+          <Card.Body>
+            <div style={{ overflowX: 'auto' }}>
             <table className="table table-sm table-striped table-hover">
               <thead>
                 <tr>
@@ -241,9 +243,11 @@ function AddMed() {
                 )}
               </tbody>
             </table>
-         </Card.Body>
-      </Card>
-    </Container>
+            </div>
+          </Card.Body>
+        </Card>
+      </Container>
+    </div>
   );
 }
 

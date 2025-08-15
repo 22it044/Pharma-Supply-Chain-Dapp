@@ -245,42 +245,70 @@ function Track() {
     }
 
     return (
-        <ListGroup variant="flush">
-            <ListGroup.Item><b>Medicine Name:</b> {MED.name}</ListGroup.Item>
-            <ListGroup.Item><b>Description:</b> {MED.description}</ListGroup.Item>
-            <ListGroup.Item><b>Current Stage:</b> {MedStage}</ListGroup.Item>
-            <hr />
-            {TrackTillRMS && RMS && (
-                 <ListGroup.Item>
-                    <b>Raw Material Supplier:</b> {RMS.name} ({RMS.place}) <br />
-                    <small>Address: {RMS.addr}</small>
-                 </ListGroup.Item>
+        <div>
+            <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                <h6 style={{ color: 'var(--primary-color)', marginBottom: '0.75rem', fontWeight: '600' }}>💊 Medicine Information</h6>
+                <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Name:</b> {MED.name}</p>
+                <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Description:</b> {MED.description}</p>
+                <p style={{ marginBottom: '0', color: 'var(--text-primary)' }}><b>Current Stage:</b> <span style={{ background: 'var(--primary-color)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.875rem' }}>{MedStage}</span></p>
+            </div>
+            
+            {(TrackTillRMS || TrackTillManufacture || TrackTillDistribution || TrackTillRetail || TrackTillSold) && (
+                <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px' }}>
+                    <h6 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontWeight: '600' }}>🔗 Supply Chain Journey</h6>
+                    
+                    {TrackTillRMS && RMS && (
+                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🏭</span>
+                                <b style={{ color: 'var(--text-primary)' }}>Raw Material Supplier</b>
+                            </div>
+                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{RMS.name} - {RMS.place}</p>
+                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {RMS.addr}</p>
+                        </div>
+                    )}
+                    
+                    {TrackTillManufacture && MAN && (
+                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🏢</span>
+                                <b style={{ color: 'var(--text-primary)' }}>Manufacturer</b>
+                            </div>
+                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{MAN.name} - {MAN.place}</p>
+                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {MAN.addr}</p>
+                        </div>
+                    )}
+                    
+                    {TrackTillDistribution && DIS && (
+                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🚚</span>
+                                <b style={{ color: 'var(--text-primary)' }}>Distributor</b>
+                            </div>
+                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{DIS.name} - {DIS.place}</p>
+                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {DIS.addr}</p>
+                        </div>
+                    )}
+                    
+                    {TrackTillRetail && RET && (
+                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: TrackTillSold ? '1px solid var(--border-color)' : 'none' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🏪</span>
+                                <b style={{ color: 'var(--text-primary)' }}>Retailer</b>
+                            </div>
+                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{RET.name} - {RET.place}</p>
+                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {RET.addr}</p>
+                        </div>
+                    )}
+                    
+                    {TrackTillSold && (
+                        <div style={{ background: 'var(--success-color)', padding: '0.75rem 1rem', borderRadius: '8px', color: 'white', textAlign: 'center', fontWeight: '600' }}>
+                            ✅ Status: Sold
+                        </div>
+                    )}
+                </div>
             )}
-            {TrackTillManufacture && MAN && (
-                <ListGroup.Item>
-                    <b>Manufacturer:</b> {MAN.name} ({MAN.place}) <br />
-                    <small>Address: {MAN.addr}</small>
-                </ListGroup.Item>
-            )}
-            {TrackTillDistribution && DIS && (
-                <ListGroup.Item>
-                    <b>Distributor:</b> {DIS.name} ({DIS.place}) <br />
-                    <small>Address: {DIS.addr}</small>
-                </ListGroup.Item>
-            )}
-             {TrackTillRetail && RET && (
-                 <ListGroup.Item>
-                    <b>Retailer:</b> {RET.name} ({RET.place}) <br />
-                    <small>Address: {RET.addr}</small>
-                 </ListGroup.Item>
-            )}
-             {TrackTillSold && (
-                 <ListGroup.Item className="bg-success text-white"><b>Status: Sold</b></ListGroup.Item>
-            )}
-             {TrackNotProcessing && (
-                 <ListGroup.Item className="bg-secondary text-white"><b>Status: Ordered, Not Yet Processed</b></ListGroup.Item>
-            )}
-        </ListGroup>
+        </div>
     );
   };
 
@@ -288,35 +316,36 @@ function Track() {
   // Initial Loader for web3/contract setup
   if (loader && !SupplyChain) { // Only show full page loader initially
     return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <h1 className="wait mt-3">Connecting to Blockchain...</h1>
-      </Container>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container className="text-center">
+          <Spinner animation="border" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <h4 className="wait mt-3">Connecting to Blockchain...</h4>
+        </Container>
+      </div>
     );
   }
 
   // Main Render
   return (
-    <Container className="mt-4">
-      <Row className="mb-3">
-        <Col>
-          <h4>Track Medicine</h4>
-          <p>Current Account: {currentaccount}</p>
-        </Col>
-        <Col className="text-end">
-          <Button variant="secondary" onClick={redirect_to_home}>
-            Back to Home
-          </Button>
-        </Col>
-      </Row>
-      <hr/>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', paddingBottom: '3rem' }}>
+      <Container className="mt-4">
+        <Row className="mb-4">
+          <Col>
+            <h4 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)' }}>📍 Track Medicine</h4>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Current Account: <code style={{ background: 'var(--bg-tertiary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.875rem' }}>{currentaccount}</code></p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <span className="badge-premium badge-primary">Tracking System</span>
+            </div>
+          </Col>
+        </Row>
+        <hr/>
 
-      <Row>
-        <Col md={5} className="mb-3 mb-md-0">
-           <Card>
-              <Card.Header as="h5">Enter Medicine ID</Card.Header>
+        <Row>
+          <Col md={5} className="mb-3 mb-md-0">
+            <Card style={{ border: '1px solid var(--border-color)', height: '100%' }}>
+              <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>🔍 Enter Medicine ID</Card.Header>
               <Card.Body>
                 <Form onSubmit={handlerSubmit}>
                     <Form.Group className="mb-3" controlId="formTrackId">
@@ -335,17 +364,18 @@ function Track() {
                 </Form>
               </Card.Body>
             </Card>
-        </Col>
-        <Col md={7}>
-            <Card>
-                <Card.Header as="h5">Tracking Details</Card.Header>
+          </Col>
+          <Col md={7}>
+            <Card style={{ border: '1px solid var(--border-color)', height: '100%' }}>
+              <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>📊 Tracking Details</Card.Header>
                 <Card.Body>
                     {renderTrackingInfo()}
-                </Card.Body>
+              </Card.Body>
             </Card>
-        </Col>
-      </Row>
-    </Container>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 }
 

@@ -168,33 +168,34 @@ function Supply() {
   // Loader
   if (loader) {
     return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <h1 className="wait mt-3">Loading Blockchain Data...</h1>
-      </Container>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container className="text-center">
+          <Spinner animation="border" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <h4 className="wait mt-3">Loading Blockchain Data...</h4>
+        </Container>
+      </div>
     );
   }
 
   // Main render
   return (
-    <Container className="mt-4">
-       <Row className="mb-3">
-        <Col>
-          <h4>Control Supply Chain Stages</h4>
-          <p>Current Account: {currentaccount}</p>
-        </Col>
-        <Col className="text-end">
-          <Button variant="secondary" onClick={redirect_to_home}>
-            Back to Home
-          </Button>
-        </Col>
-      </Row>
-      <hr/>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', paddingBottom: '3rem' }}>
+      <Container className="mt-4">
+        <Row className="mb-4">
+          <Col>
+            <h4 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)' }}>🔄 Control Supply Chain Stages</h4>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Current Account: <code style={{ background: 'var(--bg-tertiary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.875rem' }}>{currentaccount}</code></p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <span className="badge-premium badge-info">Supply Chain Manager</span>
+            </div>
+          </Col>
+        </Row>
+        <hr/>
 
-      <Card className="mb-4">
-         <Card.Header as="h5">Update Medicine Stage</Card.Header>
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>⚙️ Update Medicine Stage</Card.Header>
          <Card.Body>
           <Form>
             <Form.Group as={Row} className="mb-3" controlId="formMedicineId">
@@ -210,21 +211,21 @@ function Supply() {
               </Col>
             </Form.Group>
 
-            <div className="d-flex flex-wrap justify-content-start gap-2">
-              <Button variant="primary" onClick={handlerSubmitRMSsupply} disabled={!ID}>
-                1. RMS Supply
+            <div className="d-flex flex-wrap justify-content-start gap-2" style={{ gap: '0.75rem' }}>
+              <Button variant="primary" onClick={handlerSubmitRMSsupply} disabled={!ID} style={{ minWidth: '140px' }}>
+                🏭 1. RMS Supply
               </Button>
-              <Button variant="info" onClick={handlerSubmitManufacturing} disabled={!ID} className="text-white">
-                2. Manufacture
+              <Button variant="info" onClick={handlerSubmitManufacturing} disabled={!ID} className="text-white" style={{ minWidth: '140px' }}>
+                🏢 2. Manufacture
               </Button>
-              <Button variant="warning" onClick={handlerSubmitDistribute} disabled={!ID} className="text-dark">
-                3. Distribute
+              <Button variant="warning" onClick={handlerSubmitDistribute} disabled={!ID} className="text-dark" style={{ minWidth: '140px' }}>
+                🚚 3. Distribute
               </Button>
-              <Button variant="danger" onClick={handlerSubmitRetail} disabled={!ID}>
-                4. Retail
+              <Button variant="danger" onClick={handlerSubmitRetail} disabled={!ID} style={{ minWidth: '140px' }}>
+                🏪 4. Retail
               </Button>
-              <Button variant="success" onClick={handlerSubmitSold} disabled={!ID}>
-                5. Mark Sold
+              <Button variant="success" onClick={handlerSubmitSold} disabled={!ID} style={{ minWidth: '140px' }}>
+                ✅ 5. Mark Sold
               </Button>
             </div>
             <Form.Text className="text-muted mt-2 d-block">
@@ -234,9 +235,10 @@ function Supply() {
         </Card.Body>
       </Card>
 
-       <Card>
-         <Card.Header as="h5">Medicine Stock & Stages</Card.Header>
-         <Card.Body>
+        <Card style={{ border: '1px solid var(--border-color)' }}>
+          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>📊 Medicine Stock & Stages</Card.Header>
+          <Card.Body>
+            <div style={{ overflowX: 'auto' }}>
             <Table striped bordered hover responsive size="sm">
               <thead>
                 <tr>
@@ -263,9 +265,11 @@ function Supply() {
                  )}
               </tbody>
             </Table>
-         </Card.Body>
-      </Card>
-    </Container>
+            </div>
+          </Card.Body>
+        </Card>
+      </Container>
+    </div>
   );
 }
 

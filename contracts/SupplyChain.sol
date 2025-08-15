@@ -86,10 +86,14 @@ contract SupplyChain {
         uint256 id; //supplier id
         string name; //Name of the raw material supplier
         string place; //Place the raw material supplier is based in
+        bool isActive; //Status of the supplier (active/inactive)
     }
 
     //To store all the raw material suppliers on the blockchain
     mapping(uint256 => rawMaterialSupplier) public RMS;
+    
+    //To check if address is already registered as RMS
+    mapping(address => bool) private rmsExists;
 
     //To store information about manufacturer
     struct manufacturer {
@@ -97,10 +101,14 @@ contract SupplyChain {
         uint256 id; //manufacturer id
         string name; //Name of the manufacturer
         string place; //Place the manufacturer is based in
+        bool isActive; //Status of the manufacturer (active/inactive)
     }
 
     //To store all the manufacturers on the blockchain
     mapping(uint256 => manufacturer) public MAN;
+    
+    //To check if address is already registered as Manufacturer
+    mapping(address => bool) private manExists;
 
     //To store information about distributor
     struct distributor {
@@ -108,10 +116,14 @@ contract SupplyChain {
         uint256 id; //distributor id
         string name; //Name of the distributor
         string place; //Place the distributor is based in
+        bool isActive; //Status of the distributor (active/inactive)
     }
 
     //To store all the distributors on the blockchain
     mapping(uint256 => distributor) public DIS;
+    
+    //To check if address is already registered as Distributor
+    mapping(address => bool) private disExists;
 
     //To store information about retailer
     struct retailer {
@@ -119,10 +131,14 @@ contract SupplyChain {
         uint256 id; //retailer id
         string name; //Name of the retailer
         string place; //Place the retailer is based in
+        bool isActive; //Status of the retailer (active/inactive)
     }
 
     //To store all the retailers on the blockchain
     mapping(uint256 => retailer) public RET;
+    
+    //To check if address is already registered as Retailer
+    mapping(address => bool) private retExists;
 
     //To add raw material suppliers. Only contract owner can add a new raw material supplier
     function addRMS(
@@ -130,8 +146,10 @@ contract SupplyChain {
         string memory _name,
         string memory _place
     ) public onlyByOwner() {
+        require(!rmsExists[_address], "This address is already registered as RMS");
         rmsCtr++;
-        RMS[rmsCtr] = rawMaterialSupplier(_address, rmsCtr, _name, _place);
+        RMS[rmsCtr] = rawMaterialSupplier(_address, rmsCtr, _name, _place, true);
+        rmsExists[_address] = true;
     }
 
     //To add manufacturer. Only contract owner can add a new manufacturer
@@ -140,8 +158,10 @@ contract SupplyChain {
         string memory _name,
         string memory _place
     ) public onlyByOwner() {
+        require(!manExists[_address], "This address is already registered as Manufacturer");
         manCtr++;
-        MAN[manCtr] = manufacturer(_address, manCtr, _name, _place);
+        MAN[manCtr] = manufacturer(_address, manCtr, _name, _place, true);
+        manExists[_address] = true;
     }
 
     //To add distributor. Only contract owner can add a new distributor
@@ -150,8 +170,10 @@ contract SupplyChain {
         string memory _name,
         string memory _place
     ) public onlyByOwner() {
+        require(!disExists[_address], "This address is already registered as Distributor");
         disCtr++;
-        DIS[disCtr] = distributor(_address, disCtr, _name, _place);
+        DIS[disCtr] = distributor(_address, disCtr, _name, _place, true);
+        disExists[_address] = true;
     }
 
     //To add retailer. Only contract owner can add a new retailer
@@ -160,8 +182,34 @@ contract SupplyChain {
         string memory _name,
         string memory _place
     ) public onlyByOwner() {
+        require(!retExists[_address], "This address is already registered as Retailer");
         retCtr++;
-        RET[retCtr] = retailer(_address, retCtr, _name, _place);
+        RET[retCtr] = retailer(_address, retCtr, _name, _place, true);
+        retExists[_address] = true;
+    }
+
+    //To toggle RMS active status. Only contract owner can toggle
+    function toggleRMSStatus(uint256 _id) public onlyByOwner() {
+        require(_id > 0 && _id <= rmsCtr, "Invalid RMS ID");
+        RMS[_id].isActive = !RMS[_id].isActive;
+    }
+
+    //To toggle Manufacturer active status. Only contract owner can toggle
+    function toggleManufacturerStatus(uint256 _id) public onlyByOwner() {
+        require(_id > 0 && _id <= manCtr, "Invalid Manufacturer ID");
+        MAN[_id].isActive = !MAN[_id].isActive;
+    }
+
+    //To toggle Distributor active status. Only contract owner can toggle
+    function toggleDistributorStatus(uint256 _id) public onlyByOwner() {
+        require(_id > 0 && _id <= disCtr, "Invalid Distributor ID");
+        DIS[_id].isActive = !DIS[_id].isActive;
+    }
+
+    //To toggle Retailer active status. Only contract owner can toggle
+    function toggleRetailerStatus(uint256 _id) public onlyByOwner() {
+        require(_id > 0 && _id <= retCtr, "Invalid Retailer ID");
+        RET[_id].isActive = !RET[_id].isActive;
     }
 
     //To supply raw materials from RMS supplier to the manufacturer
@@ -169,12 +217,13 @@ contract SupplyChain {
         require(_medicineID > 0 && _medicineID <= medicineCtr, "RMSsupply: Invalid Medicine ID");
         uint256 _id = findRMS(msg.sender);
         require(_id > 0, "RMSsupply: Caller is not a registered RMS");
+        require(RMS[_id].isActive, "RMSsupply: Your account is deactivated");
         require(MedicineStock[_medicineID].stage == STAGE.Init, "RMSsupply: Medicine not in Init stage");
         MedicineStock[_medicineID].RMSid = _id;
         MedicineStock[_medicineID].stage = STAGE.RawMaterialSupply;
     }
 
-    //To check if RMS is available in the blockchain
+    //To check if RMS is available and active in the blockchain
     function findRMS(address _address) private view returns (uint256) {
         require(rmsCtr > 0);
         for (uint256 i = 1; i <= rmsCtr; i++) {
@@ -188,12 +237,13 @@ contract SupplyChain {
         require(_medicineID > 0 && _medicineID <= medicineCtr, "Manufacturing: Invalid Medicine ID");
         uint256 _id = findMAN(msg.sender);
         require(_id > 0, "Manufacturing: Caller is not a registered Manufacturer");
+        require(MAN[_id].isActive, "Manufacturing: Your account is deactivated");
         require(MedicineStock[_medicineID].stage == STAGE.RawMaterialSupply, "Manufacturing: Medicine not in RawMaterialSupply stage");
         MedicineStock[_medicineID].MANid = _id;
         MedicineStock[_medicineID].stage = STAGE.Manufacture;
     }
 
-    //To check if Manufacturer is available in the blockchain
+    //To check if Manufacturer is available and active in the blockchain
     function findMAN(address _address) private view returns (uint256) {
         require(manCtr > 0);
         for (uint256 i = 1; i <= manCtr; i++) {
@@ -207,12 +257,13 @@ contract SupplyChain {
         require(_medicineID > 0 && _medicineID <= medicineCtr, "Distribute: Invalid Medicine ID");
         uint256 _id = findDIS(msg.sender);
         require(_id > 0, "Distribute: Caller is not a registered Distributor");
+        require(DIS[_id].isActive, "Distribute: Your account is deactivated");
         require(MedicineStock[_medicineID].stage == STAGE.Manufacture, "Distribute: Medicine not in Manufacture stage");
         MedicineStock[_medicineID].DISid = _id;
         MedicineStock[_medicineID].stage = STAGE.Distribution;
     }
 
-    //To check if distributor is available in the blockchain
+    //To check if distributor is available and active in the blockchain
     function findDIS(address _address) private view returns (uint256) {
         require(disCtr > 0);
         for (uint256 i = 1; i <= disCtr; i++) {
@@ -226,12 +277,13 @@ contract SupplyChain {
         require(_medicineID > 0 && _medicineID <= medicineCtr, "Retail: Invalid Medicine ID");
         uint256 _id = findRET(msg.sender);
         require(_id > 0, "Retail: Caller is not a registered Retailer");
+        require(RET[_id].isActive, "Retail: Your account is deactivated");
         require(MedicineStock[_medicineID].stage == STAGE.Distribution, "Retail: Medicine not in Distribution stage");
         MedicineStock[_medicineID].RETid = _id;
         MedicineStock[_medicineID].stage = STAGE.Retail;
     }
 
-    //To check if retailer is available in the blockchain
+    //To check if retailer is available and active in the blockchain
     function findRET(address _address) private view returns (uint256) {
         require(retCtr > 0);
         for (uint256 i = 1; i <= retCtr; i++) {
@@ -245,6 +297,7 @@ contract SupplyChain {
         require(_medicineID > 0 && _medicineID <= medicineCtr, "Sold: Invalid Medicine ID");
         uint256 _id = findRET(msg.sender);
         require(_id > 0, "Sold: Caller is not a registered Retailer");
+        require(RET[_id].isActive, "Sold: Your account is deactivated");
         require(_id == MedicineStock[_medicineID].RETid, "Sold: Caller is not the assigned Retailer for this medicine"); 
         require(MedicineStock[_medicineID].stage == STAGE.Retail, "Sold: Medicine not in Retail stage");
         MedicineStock[_medicineID].stage = STAGE.sold;
