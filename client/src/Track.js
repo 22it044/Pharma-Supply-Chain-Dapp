@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import SupplyChainABI from "./artifacts/SupplyChain.json";
+import { QRCodeSVG } from 'qrcode.react';
 // Import react-bootstrap components
 import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
@@ -247,10 +248,21 @@ function Track() {
     return (
         <div>
             <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
-                <h6 style={{ color: 'var(--primary-color)', marginBottom: '0.75rem', fontWeight: '600' }}>💊 Medicine Information</h6>
-                <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Name:</b> {MED.name}</p>
-                <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Description:</b> {MED.description}</p>
-                <p style={{ marginBottom: '0', color: 'var(--text-primary)' }}><b>Current Stage:</b> <span style={{ background: 'var(--primary-color)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.875rem' }}>{MedStage}</span></p>
+                <Row>
+                    <Col md={8}>
+                        <h6 style={{ color: 'var(--primary-color)', marginBottom: '0.75rem', fontWeight: '600' }}>💊 Medicine Information</h6>
+                        <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>ID:</b> {MED.id}</p>
+                        <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Name:</b> {MED.name}</p>
+                        <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Description:</b> {MED.description}</p>
+                        <p style={{ marginBottom: '0', color: 'var(--text-primary)' }}><b>Current Stage:</b> <span style={{ background: 'var(--primary-color)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.875rem' }}>{MedStage}</span></p>
+                    </Col>
+                    <Col md={4} className="text-center">
+                        <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', display: 'inline-block' }}>
+                            <QRCodeSVG value={MED.id.toString()} size={120} />
+                            <p style={{ marginTop: '0.5rem', marginBottom: '0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Scan to Update</p>
+                        </div>
+                    </Col>
+                </Row>
             </div>
             
             {(TrackTillRMS || TrackTillManufacture || TrackTillDistribution || TrackTillRetail || TrackTillSold) && (

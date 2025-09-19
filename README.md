@@ -7,7 +7,7 @@
 
 > A premium, production-ready blockchain-based pharmaceutical supply chain management system ensuring complete transparency, security, and traceability from manufacturer to consumer.
 
-[🎥 Demo Video](https://www.youtube.com/watch?v=2e-NGuT1PnY) | [📖 Full Documentation](./DEPLOYMENT.md)
+[🎥 Demo Video](https://www.youtube.com/watch?v=2e-NGuT1PnY) | [📖 Full Documentation](./docs/DEPLOYMENT.md) | [📱 QR Code Guide](./docs/QR_COMPLETE_GUIDE.md)
 
 ## 🔧 Setting up Local Development
 
@@ -82,6 +82,7 @@ Open the source code and start editing!
 - **Real-time updates** - Instant supply chain status changes
 - **Complete transparency** - Full visibility of medicine journey
 - **Secure authentication** - MetaMask integration
+- **📱 QR Code Integration** - Generate, scan, and update medicine status via QR codes
 
 ### 🎨 Premium UI/UX
 - Modern, responsive design for all devices
@@ -96,6 +97,11 @@ Open the source code and start editing!
 2. **Order Medicines** - Create new medicine batches
 3. **Control Chain** - Update medicine stages progressively
 4. **Track & Trace** - Complete visibility of medicine journey
+5. **📱 QR Code System** - Generate, download, and scan QR codes for instant updates
+   - Generate QR codes for all medicines
+   - Download QR codes as PNG images
+   - Scan with camera (computer/phone) or manual input
+   - Update medicine status via QR scanning
 
 ---
 
@@ -107,13 +113,22 @@ Open the source code and start editing!
 - **Web3 Library**: Web3.js 1.10.0
 - **UI Framework**: React Bootstrap 2.10.9
 - **Routing**: React Router DOM 6.11.1
+- **QR Code**: qrcode.react, html5-qrcode
 - **Build Tool**: React Scripts 5.0.1
 
 ---
 
 ## 📖 Documentation
 
-For detailed deployment instructions, configuration options, and production setup, see [DEPLOYMENT.md](./DEPLOYMENT.md)
+All comprehensive documentation is available in the [`docs/`](./docs/) folder:
+
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Complete deployment instructions
+- **[QR Code Complete Guide](./docs/QR_COMPLETE_GUIDE.md)** - Full QR code system documentation
+- **[QR Implementation Summary](./docs/QR_IMPLEMENTATION_SUMMARY.md)** - Technical implementation details
+- **[QR Quick Start](./docs/QR_QUICK_START.md)** - Quick testing guide
+- **[Phone Camera Setup](./docs/PHONE_CAMERA_SETUP.md)** - Use phone camera for QR scanning
+- **[QR Integration Guide](./docs/QR_INTEGRATION_GUIDE.md)** - Technical integration details
+- **[Fixes Applied](./docs/FIXES_APPLIED.md)** - Recent bug fixes and enhancements
 
 ---
 

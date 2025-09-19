@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import SupplyChainABI from "./artifacts/SupplyChain.json";
+import { QRCodeSVG } from 'qrcode.react';
 // Import react-bootstrap components
 import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
@@ -11,6 +12,7 @@ import Table from 'react-bootstrap/Table'; // Use react-bootstrap Table
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
+import Modal from 'react-bootstrap/Modal';
 
 function Supply() {
   const navigate = useNavigate();
@@ -19,6 +21,8 @@ function Supply() {
   const [SupplyChain, setSupplyChain] = useState();
   const [medicinesList, setMedicinesList] = useState([]); // Consolidated state
   const [ID, setID] = useState(''); // Current ID for stage update
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [selectedMedicine, setSelectedMedicine] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -165,6 +169,38 @@ function Supply() {
     handleStageChange('sold');
   };
 
+  const handleShowQR = (medicine) => {
+    setSelectedMedicine(medicine);
+    setShowQRModal(true);
+  };
+
+  const handleCloseQR = () => {
+    setShowQRModal(false);
+    setSelectedMedicine(null);
+  };
+
+  const downloadQRCode = () => {
+    const svg = document.getElementById('qr-code-svg');
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL('image/png');
+      
+      const downloadLink = document.createElement('a');
+      downloadLink.download = `Medicine_${selectedMedicine.id}_QR.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
+    };
+    
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+  };
+
   // Loader
   if (loader) {
     return (
@@ -246,6 +282,7 @@ function Supply() {
                   <th>Name</th>
                   <th>Description</th>
                   <th>Current Stage</th>
+                  <th>QR Code</th>
                 </tr>
               </thead>
               <tbody>
@@ -256,11 +293,20 @@ function Supply() {
                       <td>{medItem.name}</td>
                       <td>{medItem.description}</td>
                       <td>{medItem.stage}</td>
+                      <td className="text-center">
+                        <Button 
+                          variant="outline-primary" 
+                          size="sm"
+                          onClick={() => handleShowQR(medItem)}
+                        >
+                          📱 View QR
+                        </Button>
+                      </td>
                     </tr>
                   ))
                  ) : (
                    <tr>
-                    <td colSpan="4" className="text-center">No medicines found or data loading.</td>
+                    <td colSpan="5" className="text-center">No medicines found or data loading.</td>
                    </tr>
                  )}
               </tbody>
@@ -269,6 +315,57 @@ function Supply() {
           </Card.Body>
         </Card>
       </Container>
+
+      {/* QR Code Modal */}
+      <Modal show={showQRModal} onHide={handleCloseQR} centered>
+        <Modal.Header closeButton style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+          <Modal.Title>📱 QR Code - Medicine #{selectedMedicine?.id}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          {selectedMedicine && (
+            <div>
+              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                <h6 style={{ color: 'var(--primary-color)', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  Medicine Information
+                </h6>
+                <p style={{ marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+                  <strong>Name:</strong> {selectedMedicine.name}
+                </p>
+                <p style={{ marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+                  <strong>Description:</strong> {selectedMedicine.description}
+                </p>
+                <p style={{ marginBottom: '0', fontSize: '0.9rem' }}>
+                  <strong>Current Stage:</strong> <span style={{ background: 'var(--primary-color)', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '8px', fontSize: '0.8rem' }}>{selectedMedicine.stage}</span>
+                </p>
+              </div>
+
+              <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', display: 'inline-block', border: '2px solid var(--border-color)' }}>
+                <QRCodeSVG 
+                  id="qr-code-svg"
+                  value={selectedMedicine.id.toString()} 
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+
+              <div className="mt-3 p-2" style={{ background: '#e7f3ff', borderRadius: '8px', fontSize: '0.85rem' }}>
+                <p className="mb-0">
+                  <strong>💡 Tip:</strong> Use QR Scanner to scan this code and update medicine status
+                </p>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="success" onClick={downloadQRCode}>
+            ⬇️ Download QR Code
+          </Button>
+          <Button variant="secondary" onClick={handleCloseQR}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

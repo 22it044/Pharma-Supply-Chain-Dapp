@@ -118,6 +118,20 @@ function PremiumNavbar() {
             >
               Track
             </Nav.Link>
+            
+            <Nav.Link 
+              onClick={() => navigate('/qrscanner')}
+              style={{
+                fontWeight: isActive('/qrscanner') ? '600' : '500',
+                color: isActive('/qrscanner') ? 'var(--primary-color)' : 'var(--text-secondary)',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                background: isActive('/qrscanner') ? 'var(--primary-light)' : 'transparent'
+              }}
+            >
+              📷 QR Scanner
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
