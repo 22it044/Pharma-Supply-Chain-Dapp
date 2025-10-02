@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import SupplyChainABI from "./artifacts/SupplyChain.json";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
+import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
+import Spinner from 'react-bootstrap/Spinner';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Spinner from 'react-bootstrap/Spinner';
-import Alert from 'react-bootstrap/Alert';
-import Form from 'react-bootstrap/Form';
+import { handleError, handleContractError, logError } from './utils/errorHandler';
+import { validateMedicineId, validateQRData } from './utils/validation';
 
 function QRScanner() {
   const navigate = useNavigate();
@@ -159,11 +161,20 @@ function QRScanner() {
 
   const onScanSuccess = async (decodedText, decodedResult) => {
     console.log(`QR Code scanned: ${decodedText}`);
-    setScannedData(decodedText);
-    stopScanner();
     
-    // Fetch medicine info
-    await fetchMedicineInfo(decodedText);
+    try {
+      // Validate QR data
+      const medicineId = validateQRData(decodedText);
+      setScannedData(medicineId);
+      stopScanner();
+      
+      // Fetch medicine info
+      await fetchMedicineInfo(medicineId);
+    } catch (error) {
+      const errorInfo = handleError(error, 'QRScan');
+      setUpdateStatus({ type: 'danger', message: errorInfo.userMessage });
+      logError(error, 'QRScanner.onScanSuccess', { decodedText });
+    }
   };
 
   const onScanError = (errorMessage) => {
@@ -178,14 +189,18 @@ function QRScanner() {
     }
 
     try {
-      const medData = await SupplyChain.methods.MedicineStock(medicineId).call();
-      const stage = await SupplyChain.methods.showStage(medicineId).call();
+      // Validate medicine ID
+      const validId = validateMedicineId(medicineId);
       
-      setMedicineInfo({ ...medData, stage, id: medicineId });
-      setUpdateStatus({ type: 'success', message: `Medicine ID ${medicineId} loaded successfully!` });
+      const medData = await SupplyChain.methods.MedicineStock(validId).call();
+      const stage = await SupplyChain.methods.showStage(validId).call();
+      
+      setMedicineInfo({ ...medData, stage, id: validId });
+      setUpdateStatus({ type: 'success', message: `Medicine ID ${validId} loaded successfully!` });
     } catch (error) {
-      console.error("Error fetching medicine info:", error);
-      setUpdateStatus({ type: 'danger', message: `Error fetching medicine info: ${error.message}` });
+      const errorInfo = handleContractError(error, 'fetchMedicineInfo');
+      setUpdateStatus({ type: 'danger', message: errorInfo.userMessage });
+      logError(error, 'QRScanner.fetchMedicineInfo', { medicineId });
     }
   };
 
@@ -200,24 +215,32 @@ function QRScanner() {
 
     try {
       const receipt = await SupplyChain.methods[selectedAction](medicineInfo.id).send({ 
-        from: currentaccount 
+        from: currentaccount,
+        gas: 300000 // Set gas limit
       });
       
-      if (receipt) {
-        console.log(`${selectedAction} successful:`, receipt);
-        setUpdateStatus({ 
-          type: 'success', 
-          message: `Medicine ID ${medicineInfo.id} successfully updated to ${selectedAction} stage!` 
-        });
-        
-        // Refresh medicine info
-        await fetchMedicineInfo(medicineInfo.id);
+      // Validate receipt
+      if (!receipt || !receipt.status) {
+        throw new Error('Transaction failed: Invalid receipt');
       }
+      
+      console.log(`${selectedAction} successful:`, receipt);
+      setUpdateStatus({ 
+        type: 'success', 
+        message: `Medicine ID ${medicineInfo.id} successfully updated to ${selectedAction} stage!` 
+      });
+      
+      // Refresh medicine info
+      await fetchMedicineInfo(medicineInfo.id);
     } catch (error) {
-      console.error(`Error calling ${selectedAction}:`, error);
+      const errorInfo = handleContractError(error, selectedAction);
       setUpdateStatus({ 
         type: 'danger', 
-        message: `Error updating status: ${error.message || 'Transaction failed'}` 
+        message: errorInfo.userMessage
+      });
+      logError(error, 'QRScanner.handleUpdateStatus', { 
+        action: selectedAction, 
+        medicineId: medicineInfo.id 
       });
     } finally {
       setloader(false);
@@ -231,8 +254,15 @@ function QRScanner() {
       return;
     }
     
-    setScannedData(manualInput);
-    await fetchMedicineInfo(manualInput);
+    try {
+      // Validate input
+      const validId = validateMedicineId(manualInput);
+      setScannedData(validId);
+      await fetchMedicineInfo(validId);
+    } catch (error) {
+      const errorInfo = handleError(error, 'ManualInput');
+      setUpdateStatus({ type: 'danger', message: errorInfo.userMessage });
+    }
   };
 
   const resetScanner = () => {
