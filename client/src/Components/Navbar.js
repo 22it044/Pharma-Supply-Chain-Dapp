@@ -39,9 +39,21 @@ function PremiumNavbar() {
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            backgroundClip: 'text',
+            letterSpacing: '-0.5px'
           }}>
-            🏥 PharmaChain
+            💎 ClearSource
+          </span>
+          <span style={{
+            fontSize: '0.65rem',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            padding: '0.15rem 0.5rem',
+            borderRadius: '12px',
+            fontWeight: '600',
+            letterSpacing: '0.5px'
+          }}>
+            SUPPLY CHAIN
           </span>
         </Navbar.Brand>
         

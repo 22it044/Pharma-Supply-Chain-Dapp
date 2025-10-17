@@ -1,11 +1,11 @@
-# 🏥 PharmaChain - Pharmaceutical Supply Chain DApp
+# 💎 ClearSource - Pharmaceutical Supply Chain DApp
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Solidity](https://img.shields.io/badge/Solidity-%5E0.8.0-363636.svg)](https://soliditylang.org/)
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB.svg)](https://reactjs.org/)
 [![Web3](https://img.shields.io/badge/Web3.js-1.10.0-F16822.svg)](https://web3js.readthedocs.io/)
 
-> A premium, production-ready blockchain-based pharmaceutical supply chain management system ensuring complete transparency, security, and traceability from manufacturer to consumer.
+> **ClearSource** - A premium, production-ready blockchain-based pharmaceutical supply chain management system. Crystal-clear tracking and management ensuring complete transparency, security, and traceability from source to consumer.
 
 [🎥 Demo Video](https://www.youtube.com/watch?v=2e-NGuT1PnY) | [📖 Full Documentation](./docs/DEPLOYMENT.md) | [📱 QR Code Guide](./docs/QR_COMPLETE_GUIDE.md)
 

@@ -182,7 +182,7 @@ export const validateQRData = (qrData) => {
   return medicineId;
 };
 
-export default {
+const validators = {
   validateMedicineId,
   validateAddress,
   validateString,
@@ -195,3 +195,5 @@ export default {
   isEmpty,
   validateQRData
 };
+
+export default validators;

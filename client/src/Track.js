@@ -247,75 +247,327 @@ function Track() {
 
     return (
         <div>
-            <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+            <div style={{ 
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)', 
+              padding: '1.5rem', 
+              borderRadius: '12px', 
+              marginBottom: '1.5rem',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+              border: '1px solid rgba(0,0,0,0.05)'
+            }}>
                 <Row>
                     <Col md={8}>
-                        <h6 style={{ color: 'var(--primary-color)', marginBottom: '0.75rem', fontWeight: '600' }}>💊 Medicine Information</h6>
-                        <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>ID:</b> {MED.id}</p>
-                        <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Name:</b> {MED.name}</p>
-                        <p style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}><b>Description:</b> {MED.description}</p>
-                        <p style={{ marginBottom: '0', color: 'var(--text-primary)' }}><b>Current Stage:</b> <span style={{ background: 'var(--primary-color)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.875rem' }}>{MedStage}</span></p>
+                        <div style={{ marginBottom: '1rem' }}>
+                          <h6 style={{ 
+                            color: '#667eea', 
+                            marginBottom: '1rem', 
+                            fontWeight: '700',
+                            fontSize: '1.1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}>
+                            <span style={{ fontSize: '1.5rem' }}>💊</span>
+                            Medicine Information
+                          </h6>
+                        </div>
+                        <div style={{ display: 'grid', gap: '0.75rem' }}>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            padding: '0.5rem',
+                            background: 'rgba(102, 126, 234, 0.05)',
+                            borderRadius: '8px'
+                          }}>
+                            <strong style={{ color: '#495057', minWidth: '120px' }}>Medicine ID:</strong>
+                            <span style={{ color: '#212529', fontFamily: 'monospace', fontWeight: '600' }}>#{MED.id}</span>
+                          </div>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            padding: '0.5rem',
+                            background: 'rgba(102, 126, 234, 0.05)',
+                            borderRadius: '8px'
+                          }}>
+                            <strong style={{ color: '#495057', minWidth: '120px' }}>Name:</strong>
+                            <span style={{ color: '#212529' }}>{MED.name}</span>
+                          </div>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'flex-start',
+                            padding: '0.5rem',
+                            background: 'rgba(102, 126, 234, 0.05)',
+                            borderRadius: '8px'
+                          }}>
+                            <strong style={{ color: '#495057', minWidth: '120px' }}>Description:</strong>
+                            <span style={{ color: '#212529' }}>{MED.description}</span>
+                          </div>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            padding: '0.5rem',
+                            background: 'rgba(102, 126, 234, 0.05)',
+                            borderRadius: '8px'
+                          }}>
+                            <strong style={{ color: '#495057', minWidth: '120px' }}>Current Stage:</strong>
+                            <span style={{ 
+                              background: MedStage === "Medicine Sold" ? '#28a745' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+                              color: 'white', 
+                              padding: '0.4rem 1rem', 
+                              borderRadius: '20px', 
+                              fontSize: '0.875rem',
+                              fontWeight: '600',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                            }}>
+                              {MedStage}
+                            </span>
+                          </div>
+                        </div>
                     </Col>
                     <Col md={4} className="text-center">
-                        <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', display: 'inline-block' }}>
-                            <QRCodeSVG value={MED.id.toString()} size={120} />
-                            <p style={{ marginTop: '0.5rem', marginBottom: '0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Scan to Update</p>
+                        <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', display: 'inline-block', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '2px solid #f0f0f0' }}>
+                            <QRCodeSVG value={MED.id.toString()} size={120} level="H" />
+                            {MedStage !== "Medicine Sold" && (
+                                <p style={{ marginTop: '0.75rem', marginBottom: '0', fontSize: '0.85rem', color: '#6c757d', fontWeight: '500' }}>
+                                    <span style={{ display: 'block', fontSize: '1.2rem', marginBottom: '0.25rem' }}>📱</span>
+                                    Scan to Update Status
+                                </p>
+                            )}
+                            {MedStage === "Medicine Sold" && (
+                                <p style={{ marginTop: '0.75rem', marginBottom: '0', fontSize: '0.85rem', color: '#28a745', fontWeight: '600' }}>
+                                    <span style={{ display: 'block', fontSize: '1.2rem', marginBottom: '0.25rem' }}>✅</span>
+                                    Completed
+                                </p>
+                            )}
                         </div>
                     </Col>
                 </Row>
             </div>
             
             {(TrackTillRMS || TrackTillManufacture || TrackTillDistribution || TrackTillRetail || TrackTillSold) && (
-                <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px' }}>
-                    <h6 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontWeight: '600' }}>🔗 Supply Chain Journey</h6>
+                <div style={{ 
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)', 
+                  padding: '1.5rem', 
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                  border: '1px solid rgba(0,0,0,0.05)'
+                }}>
+                    <h6 style={{ 
+                      color: '#667eea', 
+                      marginBottom: '1.5rem', 
+                      fontWeight: '700',
+                      fontSize: '1.1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      paddingBottom: '1rem',
+                      borderBottom: '2px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <span style={{ fontSize: '1.5rem' }}>🔗</span>
+                      Supply Chain Journey
+                    </h6>
                     
                     {TrackTillRMS && RMS && (
-                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🏭</span>
-                                <b style={{ color: 'var(--text-primary)' }}>Raw Material Supplier</b>
+                        <div style={{ 
+                          marginBottom: '1.25rem', 
+                          padding: '1rem', 
+                          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                          borderRadius: '10px',
+                          borderLeft: '4px solid #667eea',
+                          transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <div style={{ 
+                                  width: '48px', 
+                                  height: '48px', 
+                                  borderRadius: '50%', 
+                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  marginRight: '1rem',
+                                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                                }}>
+                                  <span style={{ fontSize: '1.5rem' }}>🏭</span>
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: '700', color: '#212529', fontSize: '1rem' }}>Raw Material Supplier</div>
+                                  <div style={{ fontSize: '0.75rem', color: '#6c757d', marginTop: '0.15rem' }}>Stage 1</div>
+                                </div>
                             </div>
-                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{RMS.name} - {RMS.place}</p>
-                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {RMS.addr}</p>
+                            <div style={{ paddingLeft: '4rem' }}>
+                              <p style={{ marginBottom: '0.4rem', color: '#495057', fontWeight: '600' }}>
+                                {RMS.name}
+                              </p>
+                              <p style={{ marginBottom: '0.4rem', fontSize: '0.9rem', color: '#6c757d' }}>
+                                <strong>Location:</strong> {RMS.place}
+                              </p>
+                              <p style={{ marginBottom: '0', fontSize: '0.85rem', color: '#6c757d', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                <strong>Address:</strong> {RMS.addr}
+                              </p>
+                            </div>
                         </div>
                     )}
                     
                     {TrackTillManufacture && MAN && (
-                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🏢</span>
-                                <b style={{ color: 'var(--text-primary)' }}>Manufacturer</b>
+                        <div style={{ 
+                          marginBottom: '1.25rem', 
+                          padding: '1rem', 
+                          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                          borderRadius: '10px',
+                          borderLeft: '4px solid #667eea',
+                          transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <div style={{ 
+                                  width: '48px', 
+                                  height: '48px', 
+                                  borderRadius: '50%', 
+                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  marginRight: '1rem',
+                                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                                }}>
+                                  <span style={{ fontSize: '1.5rem' }}>🏢</span>
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: '700', color: '#212529', fontSize: '1rem' }}>Manufacturer</div>
+                                  <div style={{ fontSize: '0.75rem', color: '#6c757d', marginTop: '0.15rem' }}>Stage 2</div>
+                                </div>
                             </div>
-                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{MAN.name} - {MAN.place}</p>
-                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {MAN.addr}</p>
+                            <div style={{ paddingLeft: '4rem' }}>
+                              <p style={{ marginBottom: '0.4rem', color: '#495057', fontWeight: '600' }}>
+                                {MAN.name}
+                              </p>
+                              <p style={{ marginBottom: '0.4rem', fontSize: '0.9rem', color: '#6c757d' }}>
+                                <strong>Location:</strong> {MAN.place}
+                              </p>
+                              <p style={{ marginBottom: '0', fontSize: '0.85rem', color: '#6c757d', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                <strong>Address:</strong> {MAN.addr}
+                              </p>
+                            </div>
                         </div>
                     )}
                     
                     {TrackTillDistribution && DIS && (
-                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🚚</span>
-                                <b style={{ color: 'var(--text-primary)' }}>Distributor</b>
+                        <div style={{ 
+                          marginBottom: '1.25rem', 
+                          padding: '1rem', 
+                          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                          borderRadius: '10px',
+                          borderLeft: '4px solid #667eea',
+                          transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <div style={{ 
+                                  width: '48px', 
+                                  height: '48px', 
+                                  borderRadius: '50%', 
+                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  marginRight: '1rem',
+                                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                                }}>
+                                  <span style={{ fontSize: '1.5rem' }}>🚚</span>
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: '700', color: '#212529', fontSize: '1rem' }}>Distributor</div>
+                                  <div style={{ fontSize: '0.75rem', color: '#6c757d', marginTop: '0.15rem' }}>Stage 3</div>
+                                </div>
                             </div>
-                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{DIS.name} - {DIS.place}</p>
-                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {DIS.addr}</p>
+                            <div style={{ paddingLeft: '4rem' }}>
+                              <p style={{ marginBottom: '0.4rem', color: '#495057', fontWeight: '600' }}>
+                                {DIS.name}
+                              </p>
+                              <p style={{ marginBottom: '0.4rem', fontSize: '0.9rem', color: '#6c757d' }}>
+                                <strong>Location:</strong> {DIS.place}
+                              </p>
+                              <p style={{ marginBottom: '0', fontSize: '0.85rem', color: '#6c757d', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                <strong>Address:</strong> {DIS.addr}
+                              </p>
+                            </div>
                         </div>
                     )}
                     
                     {TrackTillRetail && RET && (
-                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: TrackTillSold ? '1px solid var(--border-color)' : 'none' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>🏪</span>
-                                <b style={{ color: 'var(--text-primary)' }}>Retailer</b>
+                        <div style={{ 
+                          marginBottom: '1.25rem', 
+                          padding: '1rem', 
+                          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                          borderRadius: '10px',
+                          borderLeft: '4px solid #667eea',
+                          transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <div style={{ 
+                                  width: '48px', 
+                                  height: '48px', 
+                                  borderRadius: '50%', 
+                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  marginRight: '1rem',
+                                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                                }}>
+                                  <span style={{ fontSize: '1.5rem' }}>🏪</span>
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: '700', color: '#212529', fontSize: '1rem' }}>Retailer</div>
+                                  <div style={{ fontSize: '0.75rem', color: '#6c757d', marginTop: '0.15rem' }}>Stage 4</div>
+                                </div>
                             </div>
-                            <p style={{ marginBottom: '0.25rem', marginLeft: '2rem', color: 'var(--text-secondary)' }}>{RET.name} - {RET.place}</p>
-                            <p style={{ marginBottom: '0', marginLeft: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Address: {RET.addr}</p>
+                            <div style={{ paddingLeft: '4rem' }}>
+                              <p style={{ marginBottom: '0.4rem', color: '#495057', fontWeight: '600' }}>
+                                {RET.name}
+                              </p>
+                              <p style={{ marginBottom: '0.4rem', fontSize: '0.9rem', color: '#6c757d' }}>
+                                <strong>Location:</strong> {RET.place}
+                              </p>
+                              <p style={{ marginBottom: '0', fontSize: '0.85rem', color: '#6c757d', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                <strong>Address:</strong> {RET.addr}
+                              </p>
+                            </div>
                         </div>
                     )}
                     
                     {TrackTillSold && (
-                        <div style={{ background: 'var(--success-color)', padding: '0.75rem 1rem', borderRadius: '8px', color: 'white', textAlign: 'center', fontWeight: '600' }}>
-                            ✅ Status: Sold
+                        <div style={{ 
+                          marginBottom: '0', 
+                          padding: '1rem', 
+                          background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(25, 135, 84, 0.1) 100%)',
+                          borderRadius: '10px',
+                          borderLeft: '4px solid #28a745',
+                          transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <div style={{ 
+                                  width: '48px', 
+                                  height: '48px', 
+                                  borderRadius: '50%', 
+                                  background: 'linear-gradient(135deg, #28a745 0%, #198754 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  marginRight: '1rem',
+                                  boxShadow: '0 4px 12px rgba(40, 167, 69, 0.3)'
+                                }}>
+                                  <span style={{ fontSize: '1.5rem' }}>✅</span>
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: '700', color: '#212529', fontSize: '1rem' }}>Medicine Sold</div>
+                                  <div style={{ fontSize: '0.75rem', color: '#28a745', marginTop: '0.15rem', fontWeight: '600' }}>Final Stage - Completed ✓</div>
+                                </div>
+                            </div>
+                            <div style={{ paddingLeft: '4rem' }}>
+                              <p style={{ marginBottom: '0', color: '#495057', fontSize: '0.95rem' }}>
+                                This medicine has completed its journey through the supply chain and has been sold to the end consumer.
+                              </p>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -341,46 +593,113 @@ function Track() {
 
   // Main Render
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', paddingBottom: '3rem' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', paddingBottom: '3rem' }}>
       <Container className="mt-4">
-        <Row className="mb-4">
-          <Col>
-            <h4 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)' }}>📍 Track Medicine</h4>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Current Account: <code style={{ background: 'var(--bg-tertiary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.875rem' }}>{currentaccount}</code></p>
-            <div style={{ marginTop: '0.75rem' }}>
-              <span className="badge-premium badge-primary">Tracking System</span>
-            </div>
-          </Col>
-        </Row>
-        <hr/>
+        {/* Enhanced Page Header */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+          borderRadius: '16px', 
+          padding: '2rem', 
+          marginBottom: '2rem',
+          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.25)'
+        }}>
+          <Row className="align-items-center">
+            <Col>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '2.5rem', marginRight: '1rem' }}>📍</span>
+                <h2 style={{ fontSize: '2rem', fontWeight: '700', color: 'white', marginBottom: '0' }}>Track & Trace</h2>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.9)', marginBottom: '0.5rem', fontSize: '1rem' }}>Real-time medicine supply chain tracking</p>
+              <div style={{ background: 'rgba(255,255,255,0.15)', padding: '0.5rem 1rem', borderRadius: '8px', display: 'inline-block', backdropFilter: 'blur(10px)' }}>
+                <small style={{ color: 'white', fontFamily: 'monospace' }}>
+                  <strong>Connected:</strong> {currentaccount.substring(0, 6)}...{currentaccount.substring(38)}
+                </small>
+              </div>
+            </Col>
+          </Row>
+        </div>
 
         <Row>
           <Col md={5} className="mb-3 mb-md-0">
-            <Card style={{ border: '1px solid var(--border-color)', height: '100%' }}>
-              <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>🔍 Enter Medicine ID</Card.Header>
-              <Card.Body>
+            <Card style={{ 
+              border: 'none', 
+              height: '100%',
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+              overflow: 'hidden'
+            }}>
+              <Card.Header as="h5" style={{ 
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+                color: 'white',
+                padding: '1.25rem',
+                borderBottom: 'none',
+                fontSize: '1.1rem',
+                fontWeight: '600'
+              }}>
+                🔍 Enter Medicine ID
+              </Card.Header>
+              <Card.Body style={{ padding: '1.5rem' }}>
                 <Form onSubmit={handlerSubmit}>
                     <Form.Group className="mb-3" controlId="formTrackId">
-                        <Form.Label>Medicine ID:</Form.Label>
+                        <Form.Label style={{ fontWeight: '600', color: '#495057', marginBottom: '0.5rem' }}>Medicine ID</Form.Label>
                         <Form.Control
                           type="number"
                           onChange={handlerChangeID}
-                          placeholder="Enter ID to track"
+                          placeholder="Enter medicine ID to track"
                           required
                           min="1"
+                          style={{
+                            borderRadius: '8px',
+                            border: '2px solid #e9ecef',
+                            padding: '0.75rem',
+                            fontSize: '1rem',
+                            transition: 'all 0.3s ease'
+                          }}
                         />
+                        <Form.Text className="text-muted" style={{ fontSize: '0.875rem' }}>
+                          Enter a valid medicine ID to view its complete supply chain journey
+                        </Form.Text>
                     </Form.Group>
-                    <Button variant="primary" type="submit" disabled={!ID || loader}>
-                      {loader && !SupplyChain ? 'Connecting...' : (loader ? 'Tracking...' : 'Track')}
+                    <Button 
+                      variant="primary" 
+                      type="submit" 
+                      disabled={!ID || loader}
+                      style={{
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '0.75rem 2rem',
+                        fontWeight: '600',
+                        fontSize: '1rem',
+                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      {loader && !SupplyChain ? '⏳ Connecting...' : (loader ? '🔍 Tracking...' : '🚀 Track Medicine')}
                     </Button>
                 </Form>
               </Card.Body>
             </Card>
           </Col>
           <Col md={7}>
-            <Card style={{ border: '1px solid var(--border-color)', height: '100%' }}>
-              <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>📊 Tracking Details</Card.Header>
-                <Card.Body>
+            <Card style={{ 
+              border: 'none', 
+              height: '100%',
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+              overflow: 'hidden'
+            }}>
+              <Card.Header as="h5" style={{ 
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+                color: 'white',
+                padding: '1.25rem',
+                borderBottom: 'none',
+                fontSize: '1.1rem',
+                fontWeight: '600'
+              }}>
+                📊 Tracking Details
+              </Card.Header>
+                <Card.Body style={{ padding: '1.5rem' }}>
                     {renderTrackingInfo()}
               </Card.Body>
             </Card>

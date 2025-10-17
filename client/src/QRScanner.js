@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import SupplyChainABI from "./artifacts/SupplyChain.json";
 import { Html5QrcodeScanner } from 'html5-qrcode';
@@ -15,7 +14,6 @@ import { handleError, handleContractError, logError } from './utils/errorHandler
 import { validateMedicineId, validateQRData } from './utils/validation';
 
 function QRScanner() {
-  const navigate = useNavigate();
   const scannerRef = useRef(null);
   const [currentaccount, setCurrentaccount] = useState("");
   const [loader, setloader] = useState(true);

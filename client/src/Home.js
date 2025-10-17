@@ -23,7 +23,7 @@ function Home() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', paddingBottom: '4rem' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', paddingBottom: '4rem' }}>
       {/* Premium Hero Section */}
       <div style={{
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -59,30 +59,40 @@ function Home() {
             <Col lg={10} xl={8}>
               <div className="text-center" style={{ color: 'white' }}>
                 <div style={{ 
-                  fontSize: '4rem', 
-                  marginBottom: '1.5rem',
+                  fontSize: '4.5rem', 
+                  marginBottom: '1rem',
                   animation: 'float 3s ease-in-out infinite'
                 }}>
-                  🏥
+                  💎
                 </div>
                 <h1 style={{ 
-                  fontSize: '3rem', 
-                  fontWeight: '800', 
-                  marginBottom: '1.5rem',
+                  fontSize: '3.5rem', 
+                  fontWeight: '900', 
+                  marginBottom: '1rem',
                   textShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                  letterSpacing: '-0.02em'
+                  letterSpacing: '-1px'
                 }}>
-                  Pharmaceutical Supply Chain
+                  ClearSource
                 </h1>
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  opacity: '0.95',
+                  marginBottom: '1.5rem',
+                  letterSpacing: '2px'
+                }}>
+                  PHARMACEUTICAL SUPPLY CHAIN
+                </div>
                 <p style={{ 
                   fontSize: '1.25rem', 
-                  opacity: '0.95',
-                  maxWidth: '700px', 
+                  opacity: '0.9',
+                  maxWidth: '750px', 
                   margin: '0 auto 2rem',
-                  lineHeight: '1.7'
+                  lineHeight: '1.8',
+                  fontWeight: '400'
                 }}>
-                  Track and manage medicines transparently using blockchain technology. 
-                  Ensure authenticity, security, and complete traceability throughout the entire supply chain.
+                  Crystal-clear tracking and management of medicines using blockchain technology. 
+                  Ensuring authenticity, security, and complete transparency from source to consumer.
                 </p>
                 
                 {/* Feature Pills */}
@@ -232,8 +242,8 @@ function Home() {
             }}>
               <Row className="align-items-center">
                 <Col lg={6} className="mb-4 mb-lg-0">
-                  <h4 style={{ fontWeight: '700', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
-                    Why Choose PharmaChain?
+                  <h4 style={{ fontWeight: '700', color: 'var(--text-primary)', marginBottom: '1.5rem', fontSize: '1.75rem' }}>
+                    Why Choose ClearSource?
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div className="info-box" style={{ 

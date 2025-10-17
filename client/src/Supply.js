@@ -217,65 +217,176 @@ function Supply() {
 
   // Main render
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', paddingBottom: '3rem' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', paddingBottom: '3rem' }}>
       <Container className="mt-4">
-        <Row className="mb-4">
-          <Col>
-            <h4 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)' }}>🔄 Control Supply Chain Stages</h4>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Current Account: <code style={{ background: 'var(--bg-tertiary)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.875rem' }}>{currentaccount}</code></p>
-            <div style={{ marginTop: '0.75rem' }}>
-              <span className="badge-premium badge-info">Supply Chain Manager</span>
-            </div>
-          </Col>
-        </Row>
-        <hr/>
+        {/* Enhanced Page Header */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+          borderRadius: '16px', 
+          padding: '2rem', 
+          marginBottom: '2rem',
+          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.25)'
+        }}>
+          <Row className="align-items-center">
+            <Col>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '2.5rem', marginRight: '1rem' }}>🔄</span>
+                <h2 style={{ fontSize: '2rem', fontWeight: '700', color: 'white', marginBottom: '0' }}>Supply Chain Control</h2>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.9)', marginBottom: '0.5rem', fontSize: '1rem' }}>Update medicine stages and manage inventory</p>
+              <div style={{ background: 'rgba(255,255,255,0.15)', padding: '0.5rem 1rem', borderRadius: '8px', display: 'inline-block', backdropFilter: 'blur(10px)' }}>
+                <small style={{ color: 'white', fontFamily: 'monospace' }}>
+                  <strong>Connected:</strong> {currentaccount.substring(0, 6)}...{currentaccount.substring(38)}
+                </small>
+              </div>
+            </Col>
+          </Row>
+        </div>
 
-        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
-          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>⚙️ Update Medicine Stage</Card.Header>
-         <Card.Body>
+        <Card className="mb-4" style={{ 
+          border: 'none',
+          borderRadius: '16px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          overflow: 'hidden'
+        }}>
+          <Card.Header as="h5" style={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+            color: 'white',
+            padding: '1.25rem',
+            borderBottom: 'none',
+            fontSize: '1.1rem',
+            fontWeight: '600'
+          }}>
+            ⚙️ Update Medicine Stage
+          </Card.Header>
+         <Card.Body style={{ padding: '1.5rem' }}>
           <Form>
-            <Form.Group as={Row} className="mb-3" controlId="formMedicineId">
-              <Form.Label column sm={2}>Medicine ID:</Form.Label>
-              <Col sm={10}>
-                <Form.Control
-                  type="number"
-                  onChange={handlerChangeID}
-                  placeholder="Enter Medicine ID to update stage"
-                  required
-                  min="1" // Assuming IDs start from 1
-                />
-              </Col>
+            <Form.Group className="mb-4" controlId="formMedicineId">
+              <Form.Label style={{ fontWeight: '600', color: '#495057', marginBottom: '0.5rem' }}>Medicine ID</Form.Label>
+              <Form.Control
+                type="number"
+                onChange={handlerChangeID}
+                placeholder="Enter medicine ID to update stage"
+                required
+                min="1"
+                style={{
+                  borderRadius: '8px',
+                  border: '2px solid #e9ecef',
+                  padding: '0.75rem',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+              <Form.Text className="text-muted" style={{ fontSize: '0.875rem' }}>
+                Enter the ID of the medicine you want to advance to the next stage
+              </Form.Text>
             </Form.Group>
 
-            <div className="d-flex flex-wrap justify-content-start gap-2" style={{ gap: '0.75rem' }}>
-              <Button variant="primary" onClick={handlerSubmitRMSsupply} disabled={!ID} style={{ minWidth: '140px' }}>
-                🏭 1. RMS Supply
-              </Button>
-              <Button variant="info" onClick={handlerSubmitManufacturing} disabled={!ID} className="text-white" style={{ minWidth: '140px' }}>
-                🏢 2. Manufacture
-              </Button>
-              <Button variant="warning" onClick={handlerSubmitDistribute} disabled={!ID} className="text-dark" style={{ minWidth: '140px' }}>
-                🚚 3. Distribute
-              </Button>
-              <Button variant="danger" onClick={handlerSubmitRetail} disabled={!ID} style={{ minWidth: '140px' }}>
-                🏪 4. Retail
-              </Button>
-              <Button variant="success" onClick={handlerSubmitSold} disabled={!ID} style={{ minWidth: '140px' }}>
-                ✅ 5. Mark Sold
-              </Button>
+            <div>
+              <p style={{ fontWeight: '600', color: '#495057', marginBottom: '1rem' }}>Select Stage Action:</p>
+              <div className="d-flex flex-wrap justify-content-start gap-3" style={{ gap: '0.75rem' }}>
+                <Button 
+                  onClick={handlerSubmitRMSsupply} 
+                  disabled={!ID} 
+                  style={{ 
+                    minWidth: '150px',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1rem',
+                    fontWeight: '600',
+                    background: !ID ? '#e9ecef' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none',
+                    boxShadow: !ID ? 'none' : '0 4px 12px rgba(102, 126, 234, 0.3)'
+                  }}
+                >
+                  🏭 RMS Supply
+                </Button>
+                <Button 
+                  onClick={handlerSubmitManufacturing} 
+                  disabled={!ID}
+                  style={{ 
+                    minWidth: '150px',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1rem',
+                    fontWeight: '600',
+                    background: !ID ? '#e9ecef' : 'linear-gradient(135deg, #17a2b8 0%, #117a8b 100%)',
+                    border: 'none',
+                    color: 'white',
+                    boxShadow: !ID ? 'none' : '0 4px 12px rgba(23, 162, 184, 0.3)'
+                  }}
+                >
+                  🏢 Manufacture
+                </Button>
+                <Button 
+                  onClick={handlerSubmitDistribute} 
+                  disabled={!ID}
+                  style={{ 
+                    minWidth: '150px',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1rem',
+                    fontWeight: '600',
+                    background: !ID ? '#e9ecef' : 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)',
+                    border: 'none',
+                    color: '#000',
+                    boxShadow: !ID ? 'none' : '0 4px 12px rgba(255, 193, 7, 0.3)'
+                  }}
+                >
+                  🚚 Distribute
+                </Button>
+                <Button 
+                  onClick={handlerSubmitRetail} 
+                  disabled={!ID}
+                  style={{ 
+                    minWidth: '150px',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1rem',
+                    fontWeight: '600',
+                    background: !ID ? '#e9ecef' : 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+                    border: 'none',
+                    boxShadow: !ID ? 'none' : '0 4px 12px rgba(220, 53, 69, 0.3)'
+                  }}
+                >
+                  🏪 Retail
+                </Button>
+                <Button 
+                  onClick={handlerSubmitSold} 
+                  disabled={!ID}
+                  style={{ 
+                    minWidth: '150px',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1rem',
+                    fontWeight: '600',
+                    background: !ID ? '#e9ecef' : 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)',
+                    border: 'none',
+                    boxShadow: !ID ? 'none' : '0 4px 12px rgba(40, 167, 69, 0.3)'
+                  }}
+                >
+                  ✅ Mark Sold
+                </Button>
+              </div>
             </div>
-            <Form.Text className="text-muted mt-2 d-block">
-              Select the Medicine ID and click the corresponding button to advance its stage.
-            </Form.Text>
           </Form>
         </Card.Body>
       </Card>
 
-        <Card style={{ border: '1px solid var(--border-color)' }}>
-          <Card.Header as="h5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>📊 Medicine Stock & Stages</Card.Header>
-          <Card.Body>
+        <Card style={{ 
+          border: 'none',
+          borderRadius: '16px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          overflow: 'hidden'
+        }}>
+          <Card.Header as="h5" style={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+            color: 'white',
+            padding: '1.25rem',
+            borderBottom: 'none',
+            fontSize: '1.1rem',
+            fontWeight: '600'
+          }}>
+            📊 Medicine Stock & Stages
+          </Card.Header>
+          <Card.Body style={{ padding: '1.5rem' }}>
             <div style={{ overflowX: 'auto' }}>
-            <Table striped bordered hover responsive size="sm">
+            <Table striped bordered hover responsive style={{ marginBottom: '0' }}>
               <thead>
                 <tr>
                   <th>ID</th>

@@ -107,9 +107,11 @@ export const logError = (error, context, additionalData = {}) => {
   return errorLog;
 };
 
-export default {
+const errorHandlers = {
   handleError,
   handleMetaMaskError,
   handleContractError,
   logError
 };
+
+export default errorHandlers;
